@@ -16,7 +16,7 @@ jobs:
       - name: Verify
         run: |
           codesign --verify --strict dist/MacPulse.app
-          lipo -verify_arch x86_64 arm64 dist/MacPulse.app/Contents/MacOS/iMacMonitor
+          lipo dist/MacPulse.app/Contents/MacOS/iMacMonitor -verify_arch x86_64 arm64
           hdiutil verify dist/MacPulse.dmg
       - uses: actions/upload-artifact@v4
         with:
