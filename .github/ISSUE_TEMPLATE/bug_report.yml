@@ -1,0 +1,24 @@
+name: Сообщить о проблеме
+description: Ошибка в работе MacPulse
+title: "[Ошибка] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия MacPulse
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Модель Mac и версия macOS
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Что произошло?
+      description: Шаги воспроизведения, ожидаемый и фактический результат. Не добавляйте личные данные или секреты.
+    validations:
+      required: true

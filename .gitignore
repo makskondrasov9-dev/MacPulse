@@ -1,0 +1,14 @@
+.build/
+.swiftpm/
+.DS_Store
+dist/
+
+# Local task specification and generated design notes
+agent.md
+Assets/icon-prompt.txt
+# Credentials and signing material
+.env
+.env.*
+*.p12
+*.p8
+*.mobileprovision

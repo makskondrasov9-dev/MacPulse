@@ -1,0 +1,24 @@
+name: Build and test
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: bash scripts/swift-local.sh test
+      - name: Build Universal app
+        run: bash scripts/build-app.sh
+      - name: Package DMG
+        run: bash scripts/package-dmg.sh
+      - name: Verify
+        run: |
+          codesign --verify --strict dist/MacPulse.app
+          lipo -verify_arch x86_64 arm64 dist/MacPulse.app/Contents/MacOS/iMacMonitor
+          hdiutil verify dist/MacPulse.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MacPulse-universal
+          path: dist/MacPulse.dmg

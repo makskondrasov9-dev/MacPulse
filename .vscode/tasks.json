@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "swift: build",
+      "type": "shell",
+      "command": "bash scripts/swift-local.sh build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$swiftc"
+    },
+    { "label": "swift: test", "type": "shell", "command": "bash scripts/swift-local.sh test" },
+    { "label": "swift: run", "type": "shell", "command": "bash scripts/swift-local.sh run iMacMonitor" },
+    { "label": "app: bundle", "type": "shell", "command": "bash scripts/build-app.sh" }
+  ]
+}
