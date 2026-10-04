@@ -6,12 +6,14 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "iMacMonitor", targets: ["iMacMonitor"]),
+        .executable(name: "MacPulseFanHelper", targets: ["MacPulseFanHelper"]),
         .library(name: "MonitorCore", targets: ["MonitorCore"])
     ],
     targets: [
         .target(name: "CSystem", publicHeadersPath: "include"),
         .target(name: "MonitorCore", dependencies: ["CSystem"],
                 linkerSettings: [.linkedFramework("IOKit")]),
+        .executableTarget(name: "MacPulseFanHelper", dependencies: ["MonitorCore"]),
         .executableTarget(name: "iMacMonitor", dependencies: ["MonitorCore"]),
         .testTarget(name: "MonitorCoreTests", dependencies: ["MonitorCore", "CSystem"])
     ],

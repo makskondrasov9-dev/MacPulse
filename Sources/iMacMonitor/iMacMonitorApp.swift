@@ -5,7 +5,11 @@ import MonitorCore
 @main
 struct iMacMonitorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+    @AppStorage("appearance") private var appearance = "system"
     @StateObject private var model: MonitorModel
+    private var colorScheme: ColorScheme? {
+        switch appearance { case "light": .light; case "dark": .dark; default: nil }
+    }
 
     init() {
         let model = MonitorModel()
@@ -16,6 +20,11 @@ struct iMacMonitorApp: App {
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(model: model)
+                .preferredColorScheme(colorScheme)
+                .onChange(of: appearance, initial: true) { _, value in
+                    NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
+                        (value == "light" ? NSAppearance(named: .aqua) : nil)
+                }
                 .onAppear { configure() }
         } label: {
             MenuBarLabel(model: model)
@@ -24,7 +33,12 @@ struct iMacMonitorApp: App {
         .menuBarExtraStyle(.window)
 
         Window("MacPulse", id: "dashboard") {
-            MainWindowView(model: model)
+            MainWindowView(model: model, fanModel: model.fans)
+                .preferredColorScheme(colorScheme)
+                .onChange(of: appearance, initial: true) { _, value in
+                    NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
+                        (value == "light" ? NSAppearance(named: .aqua) : nil)
+                }
                 .onAppear { configure() }
         }
         .defaultSize(width: 1040, height: 780)

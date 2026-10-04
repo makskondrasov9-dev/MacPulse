@@ -37,8 +37,14 @@ struct ProcessService {
             let name = withUnsafeBytes(of: &info.pbsd.pbi_name) {
                 String(decoding: $0.prefix(while: { $0 != 0 }), as: UTF8.self)
             }
+            var path = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+            let pathSize = UInt32(path.count)
+            let pathCount = proc_pidpath(pid, &path, pathSize)
+            let executable = pathCount > 0 ? String(decoding: path.prefix(while: { $0 != 0 }).map { UInt8(bitPattern: $0) }, as: UTF8.self) : ""
             result.append(ProcessMetrics(pid: pid, name: name.isEmpty ? "PID \(pid)" : name,
-                                         cpu: cpu, residentBytes: info.ptinfo.pti_resident_size))
+                                         cpu: cpu, residentBytes: info.ptinfo.pti_resident_size,
+                                         startedSeconds: seconds, startedMicroseconds: micros,
+                                         ownerUID: info.pbsd.pbi_uid, executablePath: executable))
         }
         previous = next
         return result

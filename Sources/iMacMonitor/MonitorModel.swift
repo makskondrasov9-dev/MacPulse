@@ -26,11 +26,13 @@ final class MonitorModel: ObservableObject {
     }
 
     let cleaner = CleanerModel()
+    let fans = FanModel()
     private let collector = MetricCollector()
     private var polling: Task<Void, Never>?
 
     func start() {
         guard polling == nil else { return }
+        fans.start()
         let collector = collector
         polling = Task { [weak self] in
             while !Task.isCancelled {
@@ -45,6 +47,7 @@ final class MonitorModel: ObservableObject {
     }
 
     func stop() async {
+        await fans.stop()
         await cleaner.stop()
         polling?.cancel()
         await polling?.value

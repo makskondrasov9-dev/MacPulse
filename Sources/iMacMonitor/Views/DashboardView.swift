@@ -5,6 +5,9 @@ import SwiftUI
 struct DashboardView: View {
     @ObservedObject var model: MonitorModel
     @State private var rankByMemory = false
+    @State private var pendingProcess: ProcessMetrics?
+    @State private var processMessage: String?
+    @State private var confirmingProcess = false
 
     private var topProcesses: [ProcessMetrics] {
         Array((model.snapshot?.processes ?? []).sorted {
@@ -106,8 +109,14 @@ struct DashboardView: View {
                     }
                     TableColumn("PID") { Text(String($0.pid)) }.width(70)
                     TableColumn("CPU") { Text(MetricFormat.percent($0.cpu)) }.width(80)
+                    TableColumn("Действие") { process in
+                        Button("Завершить") { pendingProcess = process; confirmingProcess = true }
+                            .disabled(!ProcessControlService.canTerminate(process))
+                            .help(ProcessControlService.canTerminate(process) ? "Запросить завершение процесса" : "Критический процесс защищён")
+                    }.width(100)
                     TableColumn("RAM") { Text("\(MetricFormat.gb($0.residentBytes)) GB") }.width(100)
                 }.frame(height: 280)
+                if let processMessage { Text(processMessage).font(.callout).textSelection(.enabled) }
                 Text("CPU процессов: 100% = одно ядро. RAM: Active + Wired + Compressed; значения GB используют 1024³ байт.")
                     .font(.caption).foregroundStyle(.secondary)
 
@@ -116,6 +125,21 @@ struct DashboardView: View {
         }
         .background(.ultraThinMaterial)
         .monospacedDigit()
+        .alert(pendingProcess?.isSystem == true ? "Завершить системную службу?" : "Завершить процесс?", isPresented: $confirmingProcess) {
+            Button("Отмена", role: .cancel) { pendingProcess = nil }
+            Button("Завершить", role: .destructive) {
+                guard let process = pendingProcess else { return }
+                do {
+                    try ProcessControlService.terminate(process)
+                    processMessage = "Запрос завершения отправлен: \(process.name) (PID \(process.pid)). Список обновится при следующем опросе."
+                } catch { processMessage = error.localizedDescription }
+                pendingProcess = nil
+            }
+        } message: {
+            if let process = pendingProcess {
+                Text("\(process.name), PID \(process.pid)\n" + ProcessControlService.warning(for: process))
+            }
+        }
     }
 
     private func card<Content: View>(_ title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {

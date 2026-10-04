@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var model: MonitorModel
+    @AppStorage("appearance") private var appearance = "system"
     @AppStorage("showMenuBarIcon") private var showIcon = true
     @AppStorage("showCPUPercentage") private var showCPU = true
     @AppStorage("showRAMPercentage") private var showRAM = false
@@ -17,6 +18,13 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Оформление") {
+                Picker("Тема", selection: $appearance) {
+                    Text("Как в системе").tag("system")
+                    Text("Светлая").tag("light")
+                    Text("Тёмная").tag("dark")
+                }
+            }
             Section("Строка меню") {
                 Toggle("Показывать иконку", isOn: $showIcon)
                 Toggle("Процент CPU", isOn: $showCPU)

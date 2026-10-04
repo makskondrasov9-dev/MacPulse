@@ -37,6 +37,11 @@ public struct ProcessMetrics: Sendable, Identifiable {
     /// 100% means one fully occupied logical core.
     public let cpu: Double?
     public let residentBytes: UInt64
+    public var startedSeconds: UInt64 = 0
+    public var startedMicroseconds: UInt64 = 0
+    public var ownerUID: UInt32 = 0
+    public var executablePath: String = ""
+    public var isSystem: Bool { ownerUID == 0 || executablePath.hasPrefix("/System/") || executablePath.hasPrefix("/usr/") }
 }
 
 public struct MonitorSnapshot: Sendable {
