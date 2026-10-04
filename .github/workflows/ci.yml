@@ -7,6 +7,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Validate translations
+        run: python3 scripts/check-localizations.py
       - name: Test
         run: bash scripts/swift-local.sh test
       - name: Build Universal app
@@ -19,6 +21,7 @@ jobs:
           lipo dist/MacPulse.app/Contents/MacOS/iMacMonitor -verify_arch x86_64 arm64
           codesign --verify --strict dist/MacPulse.app/Contents/MacOS/MacPulseFanHelper
           lipo dist/MacPulse.app/Contents/MacOS/MacPulseFanHelper -verify_arch x86_64 arm64
+          dist/MacPulse.app/Contents/MacOS/iMacMonitor --verify-localizations
           hdiutil verify dist/MacPulse.dmg
       - uses: actions/upload-artifact@v4
         with:

@@ -12,6 +12,7 @@ let package = Package(
     targets: [
         .target(name: "CSystem", publicHeadersPath: "include"),
         .target(name: "MonitorCore", dependencies: ["CSystem"],
+                resources: [.process("Localization/Resources")],
                 linkerSettings: [.linkedFramework("IOKit")]),
         .executableTarget(name: "MacPulseFanHelper", dependencies: ["MonitorCore"]),
         .executableTarget(name: "iMacMonitor", dependencies: ["MonitorCore"]),

@@ -12,6 +12,7 @@ for architecture in x86_64 arm64; do
 done
 APP_DIR="$PWD/dist/MacPulse.app"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+cp -R "$BIN_DIR/iMacMonitor_MonitorCore.bundle" "$APP_DIR/Contents/Resources/"
 bash scripts/build-icon.sh
 cp "$PWD/dist/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
 lipo -create "${BINARIES[@]}" -output "$APP_DIR/Contents/MacOS/iMacMonitor"
@@ -27,8 +28,8 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>MacPulse</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.5.0</string>
-<key>CFBundleVersion</key><string>8</string>
+<key>CFBundleShortVersionString</key><string>0.6.0</string>
+<key>CFBundleVersion</key><string>9</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>

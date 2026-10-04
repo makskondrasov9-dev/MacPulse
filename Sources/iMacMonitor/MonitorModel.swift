@@ -66,13 +66,13 @@ enum MetricFormat {
         guard total > 0 else { return nil }
         return min(Double(used) / Double(total) * 100, 100)
     }
-    static func percent(_ value: Double?) -> String { value.map { String(format: "%.0f%%", $0) } ?? "—" }
-    static func temperature(_ value: Double?) -> String { value.map { String(format: "%.0f °C", $0) } ?? "—" }
+    static func percent(_ value: Double?) -> String { value.map { String(format: "%.0f%%", locale: L10n.locale, $0) } ?? "—" }
+    static func temperature(_ value: Double?) -> String { value.map { String(format: "%.0f °C", locale: L10n.locale, $0) } ?? "—" }
     // Binary units match the hardware profile (32 GB RAM / 4 GB VRAM).
-    static func gb(_ value: UInt64) -> String { String(format: "%.1f", Double(value) / 1_073_741_824) }
+    static func gb(_ value: UInt64) -> String { String(format: "%.1f", locale: L10n.locale, Double(value) / 1_073_741_824) }
     static func uptime(_ value: TimeInterval?) -> String {
         guard let value else { return "—" }
         let minutes = Int(value) / 60
-        return "\(minutes / 1440)d \(minutes / 60 % 24)h \(minutes % 60)m"
+        return L("\(minutes / 1440)d \(minutes / 60 % 24)h \(minutes % 60)m")
     }
 }

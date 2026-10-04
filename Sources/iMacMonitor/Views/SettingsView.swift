@@ -1,8 +1,10 @@
+import MonitorCore
 import AppKit
 import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var model: MonitorModel
+    @AppStorage("appLanguage") private var language = "system"
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage("showMenuBarIcon") private var showIcon = true
     @AppStorage("showCPUPercentage") private var showCPU = true
@@ -16,47 +18,58 @@ struct SettingsView: View {
     @State private var settingsError: String?
     private let probe = DiskAccessProbe()
 
+    @Environment(\.locale) private var presentationLocale
+
     var body: some View {
+        let _ = presentationLocale
         Form {
-            Section("Оформление") {
-                Picker("Тема", selection: $appearance) {
-                    Text("Как в системе").tag("system")
-                    Text("Светлая").tag("light")
-                    Text("Тёмная").tag("dark")
-                }
-            }
-            Section("Строка меню") {
-                Toggle("Показывать иконку", isOn: $showIcon)
-                Toggle("Процент CPU", isOn: $showCPU)
-                Toggle("Процент RAM", isOn: $showRAM)
-                Toggle("Процент GPU / VRAM", isOn: $showGPU)
-                if showGPU {
-                    Picker("Показатель GPU", selection: $gpuUsesVRAM) {
-                        Text("Загрузка GPU").tag(false)
-                        Text("Занятая VRAM").tag(true)
+            Section(L("Язык")) {
+                Picker(L("Язык приложения"), selection: $language) {
+                    ForEach(AppLanguage.allCases) { item in
+                        Text(item.nativeName).tag(item.rawValue)
                     }
                 }
-                Toggle("Температура CPU", isOn: $showTemperature)
-                LabeledContent("Предпросмотр") { MenuBarLabel(model: model) }
-                Text("Если отключить все элементы, значок останется, чтобы меню было доступно.")
+                Text(L("Язык меняется сразу. Названия процессов и пути к файлам сохраняются в оригинале."))
                     .font(.caption).foregroundStyle(.secondary)
             }
-            Section("Обновление метрик") {
+            Section(L("Оформление")) {
+                Picker(L("Тема"), selection: $appearance) {
+                    Text(L("Как в системе")).tag("system")
+                    Text(L("Светлая")).tag("light")
+                    Text(L("Тёмная")).tag("dark")
+                }
+            }
+            Section(L("Строка меню")) {
+                Toggle(L("Показывать иконку"), isOn: $showIcon)
+                Toggle(L("Процент CPU"), isOn: $showCPU)
+                Toggle(L("Процент RAM"), isOn: $showRAM)
+                Toggle(L("Процент GPU / VRAM"), isOn: $showGPU)
+                if showGPU {
+                    Picker(L("Показатель GPU"), selection: $gpuUsesVRAM) {
+                        Text(L("Загрузка GPU")).tag(false)
+                        Text(L("Занятая VRAM")).tag(true)
+                    }
+                }
+                Toggle(L("Температура CPU"), isOn: $showTemperature)
+                LabeledContent(L("Предпросмотр")) { MenuBarLabel(model: model) }
+                Text(L("Если отключить все элементы, значок останется, чтобы меню было доступно."))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Section(L("Обновление метрик")) {
                 Slider(value: $pollingInterval, in: 1...3, step: 0.5) {
-                    Text("Интервал: \(pollingInterval, specifier: "%.1f") с")
-                } minimumValueLabel: { Text("1 с") } maximumValueLabel: { Text("3 с") }
-                Text("Рекомендуется 1,5–2 секунды. Новый интервал применяется со следующего цикла.")
+                    Text(L("Интервал: \(pollingInterval, specifier: "%.1f") с"))
+                } minimumValueLabel: { Text(L("1 с")) } maximumValueLabel: { Text(L("3 с")) }
+                Text(L("Рекомендуется 1,5–2 секунды. Новый интервал применяется со следующего цикла."))
                     .font(.caption).foregroundStyle(.secondary)
             }
-            Section("Полный доступ к диску") {
-                Label(access.rawValue, systemImage: access == .readable ? "checkmark.shield" : "lock.shield")
+            Section(L("Полный доступ к диску")) {
+                Label(L10n.text(access.rawValue), systemImage: access == .readable ? "checkmark.shield" : "lock.shield")
                     .foregroundStyle(access == .readable ? Color.green : Color.secondary)
-                Text("Проверка чтения защищённого файла — косвенный признак доступа. Точный статус смотрите в Системных настройках. Для мониторинга метрик полный доступ не требуется.")
+                Text(L("Проверка чтения защищённого файла — косвенный признак доступа. Точный статус смотрите в Системных настройках. Для мониторинга метрик полный доступ не требуется."))
                     .font(.caption).foregroundStyle(.secondary)
-                HStack {
-                    Button(checkingAccess ? "Проверка…" : "Проверить доступ") { Task { await checkAccess() } }
-                        .disabled(checkingAccess)
-                    Button("Открыть Системные настройки") { openPrivacySettings() }
+                ViewThatFits(in: .horizontal) {
+                    HStack { accessButtons }
+                    VStack(alignment: .leading) { accessButtons }
                 }
                 if let settingsError { Text(settingsError).foregroundStyle(.red) }
             }
@@ -73,6 +86,12 @@ struct SettingsView: View {
         }
     }
 
+    @ViewBuilder private var accessButtons: some View {
+        Button(checkingAccess ? L("Проверка…") : L("Проверить доступ")) { Task { await checkAccess() } }
+            .disabled(checkingAccess)
+        Button(L("Открыть Системные настройки")) { openPrivacySettings() }
+    }
+
     private func checkAccess() async {
         guard !checkingAccess else { return }
         checkingAccess = true
@@ -83,7 +102,7 @@ struct SettingsView: View {
     private func openPrivacySettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"),
               NSWorkspace.shared.open(url) else {
-            settingsError = "Откройте Конфиденциальность и безопасность → Полный доступ к диску вручную."
+            settingsError = L("Откройте Конфиденциальность и безопасность → Полный доступ к диску вручную.")
             return
         }
         settingsError = nil

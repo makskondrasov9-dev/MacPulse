@@ -29,7 +29,10 @@ struct MenuBarLabel: View {
         return values
     }
 
+    @Environment(\.locale) private var presentationLocale
+
     var body: some View {
+        let _ = presentationLocale
         HStack(spacing: 5) {
             if showIcon || components.isEmpty { Image(systemName: "desktopcomputer").accessibilityLabel("MacPulse") }
             if !components.isEmpty { Text(components.joined(separator: " | ")).monospacedDigit() }

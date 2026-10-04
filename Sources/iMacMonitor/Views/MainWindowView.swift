@@ -1,3 +1,4 @@
+import MonitorCore
 import SwiftUI
 
 private enum MainSection: String, CaseIterable, Identifiable {
@@ -18,13 +19,16 @@ struct MainWindowView: View {
     @ObservedObject var fanModel: FanModel
     @State private var selection: MainSection? = .monitor
 
+    @Environment(\.locale) private var presentationLocale
+
     var body: some View {
+        let _ = presentationLocale
         NavigationSplitView {
             List(MainSection.allCases.filter { $0 != .fans || !fanModel.fans.isEmpty }, selection: $selection) { section in
-                Label(section.rawValue, systemImage: section.icon).tag(section)
+                Label(L10n.text(section.rawValue), systemImage: section.icon).tag(section)
             }
             .navigationTitle("MacPulse")
-            .navigationSplitViewColumnWidth(min: 150, ideal: 180, max: 230)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 210, max: 300)
         } detail: {
             Group {
                 switch selection ?? .monitor {
@@ -34,7 +38,7 @@ struct MainWindowView: View {
                 case .fans: FansView(model: fanModel)
                 }
             }
-            .navigationTitle((selection ?? .monitor).rawValue)
+            .navigationTitle(L10n.text((selection ?? .monitor).rawValue))
         }
         .frame(minWidth: 680, minHeight: 500)
     }

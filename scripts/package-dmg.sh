@@ -35,12 +35,49 @@ cat > "$STAGING_DIR/Установка.txt" <<'TEXT'
 кэш которых хотите очистить. Полный доступ к диску включается по желанию
 через раздел «Настройки» MacPulse; без него часть файлов будет пропущена.
 
+Язык
+
+Откройте Настройки → Язык приложения. Доступны 12 языков и выбор языка системы.
+Изменение применяется сразу.
+
 Обновление
 
 Завершите MacPulse через меню приложения перед заменой новой версией.
 Если раньше устанавливали iMacMonitor, удалите старое приложение из «Программ»,
 чтобы не запускать две копии. Настройки сохраняются.
 
+TEXT
+cat > "$STAGING_DIR/Install.txt" <<'TEXT'
+Install MacPulse
+
+1. Drag MacPulse to Applications.
+2. Open MacPulse from Applications.
+3. Click the CPU indicator in the menu bar and choose Open MacPulse.
+
+Requires macOS 14 Sonoma or later. One installer for Intel and Apple Silicon.
+Choose your language in Settings → Application language. Twelve languages are
+included, plus Follow system. Changes apply immediately.
+
+First launch
+
+This release does not have a Developer ID signature or Apple notarization.
+If macOS blocks it, try opening the app, then go to System Settings →
+Privacy & Security → Open Anyway. Only proceed if you trust the download.
+You do not need Terminal commands or to disable macOS security.
+
+Updating
+
+Quit the running MacPulse before replacing it. Your preferences are preserved.
+If you still have an old iMacMonitor.app, remove that copy to avoid running both.
+
+Cleanup and control
+
+Quick Clean permanently empties accessible Trash items along with caches and logs.
+Use manual cleanup to choose categories. Close apps whose caches you want to clean.
+Full Disk Access is optional; inaccessible files are skipped.
+Process termination always requires confirmation. Unsaved changes can be lost.
+Custom fan control is supported on verified Intel hardware; Apple Silicon is
+read-only. macOS retains the ability to increase fan speed for cooling.
 TEXT
 hdiutil create -volname MacPulse -srcfolder "$STAGING_DIR" \
     -format UDZO -ov "$PWD/dist/MacPulse.dmg"

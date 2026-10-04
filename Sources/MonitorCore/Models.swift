@@ -41,7 +41,11 @@ public struct ProcessMetrics: Sendable, Identifiable {
     public var startedMicroseconds: UInt64 = 0
     public var ownerUID: UInt32 = 0
     public var executablePath: String = ""
-    public var isSystem: Bool { ownerUID == 0 || executablePath.hasPrefix("/System/") || executablePath.hasPrefix("/usr/") }
+    public var isSystem: Bool {
+        ownerUID == 0 || executablePath.hasPrefix("/System/") ||
+        (executablePath.hasPrefix("/usr/") && !executablePath.hasPrefix("/usr/local/")) ||
+        executablePath.hasPrefix("/bin/") || executablePath.hasPrefix("/sbin/")
+    }
 }
 
 public struct MonitorSnapshot: Sendable {

@@ -102,5 +102,5 @@ final class CleanerModel: ObservableObject {
 }
 
 extension UInt64 {
-    var cleanerSize: String { ByteCountFormatter.string(fromByteCount: Int64(clamping: self), countStyle: .file) }
+    var cleanerSize: String { Int64(clamping: self).formatted(.byteCount(style: .file).locale(L10n.locale)) }
 }

@@ -21,15 +21,32 @@ public enum ProcessControlService {
     }
 
     public static func warning(for process: ProcessMetrics) -> String {
-        let base = "Несохранённые изменения могут быть потеряны. Процесс может завершиться не сразу или быть перезапущен системой."
+        let base = L("Несохранённые изменения могут быть потеряны. Процесс может завершиться не сразу или быть перезапущен системой.")
         switch process.name.lowercased() {
-        case "finder": return "Будут закрыты окна Finder; файловые операции могут прерваться. " + base
-        case "dock": return "Панель Dock и переключение рабочих столов временно станут недоступны. " + base
-        case "systemuiserver", "controlcenter": return "Элементы строки меню и Центр управления временно исчезнут. " + base
-        case "coreaudiod": return "Звук и запись аудио могут прерваться. " + base
-        case "mds", "mdworker", "mdworker_shared": return "Индексация Spotlight и поиск файлов могут временно остановиться. " + base
+        case "finder": return L("Будут закрыты окна Finder; файловые операции могут прерваться. ") + base
+        case "dock": return L("Панель Dock и переключение рабочих столов временно станут недоступны. ") + base
+        case "systemuiserver", "controlcenter": return L("Элементы строки меню и Центр управления временно исчезнут. ") + base
+        case "coreaudiod": return L("Звук и запись аудио могут прерваться. ") + base
+        case "mds", "mdworker", "mdworker_shared": return L("Индексация Spotlight и поиск файлов могут временно остановиться. ") + base
         default:
-            return process.isSystem ? "Это системная служба. Связанные функции macOS могут перестать работать до перезапуска службы или входа в систему. " + base : base
+            return process.isSystem ? L("Это системная служба. Связанные функции macOS могут перестать работать до перезапуска службы или входа в систему. ") + base : base
+        }
+    }
+
+    public static func description(for process: ProcessMetrics) -> String {
+        switch process.name.lowercased() {
+        case "finder": "Finder — управление файлами, папками и рабочим столом."
+        case "dock": "Dock — панель приложений и переключение рабочих столов."
+        case "windowserver": "WindowServer — отображение окон и графического интерфейса macOS."
+        case "kernel_task": "Ядро macOS — управление оборудованием и системными ресурсами."
+        case "launchd": "launchd — запуск и управление системными службами."
+        case "loginwindow": "loginwindow — вход в систему и пользовательская сессия."
+        case "coreaudiod": "Системная служба воспроизведения и записи звука."
+        case "systemuiserver", "controlcenter": "Системная служба строки меню и Центра управления."
+        case "mds", "mdworker", "mdworker_shared": "Spotlight — индексирование и поиск файлов."
+        case "imacmonitor", "macpulse", "macpulsefanhelper": "Компонент MacPulse — мониторинг и управление вентиляторами."
+        default: process.isSystem ? "Системный процесс macOS. Подробное назначение не определено."
+            : "Процесс приложения или фоновая служба. Проверьте путь к исполняемому файлу, чтобы определить владельца."
         }
     }
 
