@@ -59,6 +59,7 @@ struct FanAndProcessTests {
         #expect(!ProcessControlService.canTerminate(critical))
         #expect(throws: ProcessControlError.self) { try ProcessControlService.terminate(critical) }
         let finder = ProcessMetrics(pid: 43, name: "Finder", cpu: nil, residentBytes: 0, startedSeconds: 1)
-        #expect(ProcessControlService.warning(for: finder).contains("файловые операции"))
+        #expect(ProcessControlService.warning(for: finder).hasPrefix(
+            L10n.template("Будут закрыты окна Finder; файловые операции могут прерваться. ")))
     }
 }

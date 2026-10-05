@@ -20,7 +20,7 @@ struct MenuBarLabel: View {
         if showGPU {
             if gpuUsesVRAM {
                 let percentage = snapshot.flatMap { snapshot in
-                    snapshot.gpu.usedVRAM.flatMap { MetricFormat.ratio($0, snapshot.gpu.totalVRAM) }
+                    snapshot.gpu.usedVRAM.flatMap { used in snapshot.gpu.totalVRAM.flatMap { MetricFormat.ratio(used, $0) } }
                 }
                 values.append("VRAM \(MetricFormat.percent(percentage))")
             } else { values.append("GPU \(MetricFormat.percent(snapshot?.gpu.utilization))") }

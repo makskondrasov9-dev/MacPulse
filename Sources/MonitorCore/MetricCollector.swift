@@ -5,7 +5,7 @@ public actor MetricCollector {
     private let smc = SMCService()
     private var cpu = CPUService()
     private let memory = MemoryService()
-    private let gpu = GPUService()
+    private var gpu = GPUService()
     private let battery = BatteryService()
     private let storage = StorageService()
     private var processes = ProcessService()
@@ -18,7 +18,8 @@ public actor MetricCollector {
         #else
         let temperatures: [TemperatureReading] = []
         #endif
-        return MonitorSnapshot(battery: battery.sample(), hardware: .current, thermalState: HardwareProfile.thermalState, date: Date(), cpu: cpu.sample(), memory: memory.sample(), gpu: gpu.sample(),
+        let graphics = gpu.sampleAll()
+        return MonitorSnapshot(battery: battery.sample(), hardware: .current, thermalState: HardwareProfile.thermalState, date: Date(), cpu: cpu.sample(), memory: memory.sample(), gpu: graphics.first ?? GPUService.unavailable, gpus: graphics,
                                storage: storage.sample(), uptime: CPUService.uptime(), temperatures: temperatures,
                                processes: processes.sample())
     }

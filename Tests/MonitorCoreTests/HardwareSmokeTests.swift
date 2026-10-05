@@ -25,6 +25,16 @@ struct HardwareSmokeTests {
         print("Sampling duration: \(elapsed)")
         print("Live CPU: \(usage)%; processes read: \(second.processes.count)")
         print("GPU: \(second.gpu); memory: \(String(describing: second.memory))")
+        #expect(Set(second.gpus.map(\.id)).count == second.gpus.count)
+        for graphics in second.gpus {
+            print("Detected GPU: \(graphics)")
+            if graphics.isUnified {
+                #expect(graphics.totalVRAM == nil)
+                #expect(graphics.usedVRAM == nil)
+                #expect(graphics.sharedMemoryTotal == second.memory?.total)
+            }
+            if let used = graphics.usedVRAM, let total = graphics.totalVRAM { #expect(used <= total) }
+        }
         for reading in second.temperatures {
             print("SMC \(reading.key): \(reading.celsius.map(String.init(describing:)) ?? reading.issue ?? "unavailable")")
         }

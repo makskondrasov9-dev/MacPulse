@@ -12,7 +12,7 @@ The app is not yet signed with Developer ID or notarized by Apple. If macOS bloc
 
 ## Features
 
-- CPU, RAM, GPU/VRAM, storage, temperature and activity history; battery information appears on supported laptops.
+- CPU, RAM, GPU/VRAM, storage, temperature and activity history; battery information appears on supported laptops. Each detected GPU has its own card. Dedicated VRAM capacity comes from the device, without a fixed 4 GB profile. Shared system RAM and Metal working-set limits are shown separately. Driver counters that are unavailable remain unknown.
 - Configurable menu bar indicators, refresh interval, and system/light/dark appearance.
 - Select a process to view details and request termination, or use the larger button in the table. Confirmation is required and critical processes are protected. Unsaved changes may be lost; macOS can refuse termination.
 - Fan controls on supported Intel Macs: automatic mode, minimum speed or a temperature curve. macOS can still raise fan speeds. On Apple Silicon, fan readings are read-only where available. The tab is hidden when no sensors are found.

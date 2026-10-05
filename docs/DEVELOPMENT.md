@@ -19,7 +19,7 @@ SwiftBridging, используйте `bash scripts/swift-local.sh build` и `ba
 
 ## Архитектура
 
-- `Sources/MonitorCore/Services`: сбор системных метрик, SMC, батареи и AMD GPU.
+- `Sources/MonitorCore/Services`: сбор системных метрик, SMC, батареи и GPU.
 - `MetricCollector`: последовательный сбор снимка вне главного потока.
 - `Sources/MonitorCore/Cleaner`: каталог путей, actor сканирования и удаления.
 - `Sources/iMacMonitor`: SwiftUI, состояние интерфейса и настройки.
@@ -30,7 +30,7 @@ SwiftBridging, используйте `bash scripts/swift-local.sh build` и `ba
 CPU процесса: 100% соответствует одному ядру. RAM = Active + Wired + Compressed.
 Температуры Intel проверяются на правдоподобие; TH0P — датчик отсека, не SMART SSD.
 AMD In-Use VRAM использует `inUseVidMemoryBytes`, исключая повторно используемый пул драйвера.
-Объём VRAM пока фиксирован профилем Radeon Pro 570 (4 GiB), а не универсальным обнаружением.
+Объём VRAM читается из `VRAM,totalMB` / `VRAM,totalsize` физического устройства в IOKit; фиксированного профиля нет. Связь с Metal определяется по registryID, не по названию модели. Встроенная графика с общей памятью не получает фиктивную выделенную VRAM. Метаданные Metal обновляются раз в 30 секунд; счётчики читаются при обычном опросе.
 Metal `currentAllocatedSize` не используется как системное потребление GPU: это память одного процесса.
 
 ## Проверка
@@ -109,3 +109,16 @@ dist/MacPulse.app/Contents/MacOS/iMacMonitor --verify-localizations
 Карточка процесса хранит снимок его идентичности. Нажатие «Завершить процесс» только
 открывает подтверждение после закрытия карточки. Перед отправкой SIGTERM снова
 проверяются PID, время запуска, UID и путь; неизвестное назначение не угадывается по имени.
+
+
+GPU обнаруживаются через IOAccelerator, IOGPU и display-устройства PCI, с удалением дубликатов
+по идентификаторам. Модель из физического устройства имеет приоритет перед Metal: драйвер
+может использовать имя совместимого чипа вместо модели платы. Каждый GPU получает карточку;
+меню и график используют первый дискретный GPU (иначе первый доступный). При смене основного
+GPU его старая история очищается, история CPU сохраняется. Температура GPU берётся только
+из счётчика самого устройства, чтобы не назначать одному GPU датчик другого.
+
+[Metal registryID](https://developer.apple.com/documentation/metal/mtldevice/registryid),
+[hasUnifiedMemory](https://developer.apple.com/documentation/metal/mtldevice/hasunifiedmemory),
+[recommendedMaxWorkingSetSize](https://developer.apple.com/documentation/metal/mtldevice/recommendedmaxworkingsetsize).
+Последнее — рекомендованный рабочий объём Metal, а не физический размер VRAM.

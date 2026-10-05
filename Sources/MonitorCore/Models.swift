@@ -14,13 +14,17 @@ public struct MemoryMetrics: Sendable {
     public var used: UInt64 { wired + active + compressed }
 }
 
-public struct GPUMetrics: Sendable {
+public struct GPUMetrics: Sendable, Identifiable {
     public var isUnified: Bool = false
     public var workingSetLimit: UInt64? = nil
+    public var registryID: UInt64 = 0
+    public var sharedMemoryTotal: UInt64? = nil
+    public var temperature: Double? = nil
+    public var id: String { registryID == 0 ? name : String(registryID) }
     public let name: String
     public let utilization: Double?
     public let usedVRAM: UInt64?
-    public let totalVRAM: UInt64
+    public let totalVRAM: UInt64?
     public let issue: String?
 }
 
@@ -56,6 +60,7 @@ public struct MonitorSnapshot: Sendable {
     public let cpu: CPUMetrics?
     public let memory: MemoryMetrics?
     public let gpu: GPUMetrics
+    public var gpus: [GPUMetrics] = []
     public let storage: StorageMetrics?
     public let uptime: TimeInterval?
     public let temperatures: [TemperatureReading]

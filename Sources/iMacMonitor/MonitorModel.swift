@@ -55,6 +55,10 @@ final class MonitorModel: ObservableObject {
     }
 
     private func accept(_ snapshot: MonitorSnapshot) {
+        if let previous = self.snapshot, previous.gpu.id != snapshot.gpu.id {
+            // A newly connected primary GPU must not inherit another device's chart values.
+            history = history.map { HistoryPoint(date: $0.date, cpu: $0.cpu, gpu: nil) }
+        }
         self.snapshot = snapshot
         history.append(HistoryPoint(date: snapshot.date, cpu: snapshot.cpu?.usage, gpu: snapshot.gpu.utilization))
         history.removeAll { $0.date < snapshot.date.addingTimeInterval(-60) }
@@ -66,8 +70,12 @@ enum MetricFormat {
         guard total > 0 else { return nil }
         return min(Double(used) / Double(total) * 100, 100)
     }
-    static func percent(_ value: Double?) -> String { value.map { String(format: "%.0f%%", locale: L10n.locale, $0) } ?? "—" }
-    static func temperature(_ value: Double?) -> String { value.map { String(format: "%.0f °C", locale: L10n.locale, $0) } ?? "—" }
+    // Keep compound numeric readings in their conventional order inside RTL sentences.
+    static func ltr(_ value: String) -> String {
+        L10n.language == .ar ? "\u{2066}\(value)\u{2069}" : value
+    }
+    static func percent(_ value: Double?) -> String { value.map { ltr(String(format: "%.0f%%", locale: L10n.locale, $0)) } ?? "—" }
+    static func temperature(_ value: Double?) -> String { value.map { ltr(String(format: "%.0f\u{00a0}°C", locale: L10n.locale, $0)) } ?? "—" }
     // Binary units match the hardware profile (32 GB RAM / 4 GB VRAM).
     static func gb(_ value: UInt64) -> String { String(format: "%.1f", locale: L10n.locale, Double(value) / 1_073_741_824) }
     static func uptime(_ value: TimeInterval?) -> String {

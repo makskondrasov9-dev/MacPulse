@@ -136,7 +136,7 @@
   "Active {0} · Wired {1} · Compressed {2} GB": "Activo {0} · Cableado {1} · Comprimido {2} GB",
   "VRAM In-Use": "VRAM utilizada",
   "Рекомендованный лимит Metal: {0} GB": "Límite de metales recomendado: {0} GB",
-  "Load {0} · {1}": "Cargar {0} · {1}",
+  "Load {0} · {1}": "Uso: {0} · {1}",
   "Storage /": "Almacenamiento /",
   "Volume": "Volumen",
   "Free {0} GB": "{0} GB gratis",
@@ -272,5 +272,6 @@
   "Unknown": "Desconocido",
   "Заряжается": "Cargando",
   "Не заряжается": "No cargando",
-  "{0}d {1}h {2}m": "{0} d {1} h {2} min"
+  "{0}d {1}h {2}m": "{0} d {1} h {2} min",
+  "Общая RAM: {0} GB": "RAM compartida: {0} GB"
 }

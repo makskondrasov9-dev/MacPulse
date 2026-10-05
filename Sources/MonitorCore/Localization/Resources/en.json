@@ -272,5 +272,6 @@
   "Unknown": "Unknown",
   "Заряжается": "Charging",
   "Не заряжается": "Not charging",
-  "{0}d {1}h {2}m": "{0} d {1} h {2} min"
+  "{0}d {1}h {2}m": "{0} d {1} h {2} min",
+  "Общая RAM: {0} GB": "Shared RAM: {0} GB"
 }

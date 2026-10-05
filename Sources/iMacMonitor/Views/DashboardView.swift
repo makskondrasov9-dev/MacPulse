@@ -21,6 +21,11 @@ struct DashboardView: View {
 
     @Environment(\.locale) private var presentationLocale
 
+    private var graphics: [GPUMetrics] {
+        guard let snapshot = model.snapshot else { return [] }
+        return snapshot.gpus.isEmpty ? [snapshot.gpu] : snapshot.gpus
+    }
+
     var body: some View {
         let _ = presentationLocale
         ScrollView {
@@ -37,6 +42,7 @@ struct DashboardView: View {
                     card("CPU", icon: "cpu") {
                         Text(MetricFormat.percent(model.snapshot?.cpu?.usage)).font(.title.bold())
                         Text(L("\(ProcessInfo.processInfo.processorCount) logical cores · \(MetricFormat.temperature(model.snapshot?.cpuTemperature))"))
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(model.snapshot?.hardware.processor ?? "—").font(.caption).foregroundStyle(.secondary)
                     }
                     if model.snapshot?.hardware.isAppleSilicon == true {
@@ -60,16 +66,10 @@ struct DashboardView: View {
                                 .font(.caption).foregroundStyle(.secondary)
                         } else { Text("—") }
                     }
-                    card(model.snapshot?.gpu.name ?? "GPU", icon: "display") {
-                        if let gpu = model.snapshot?.gpu {
-                            if let used = gpu.usedVRAM { MetricGauge(title: L("VRAM In-Use"), used: used, total: gpu.totalVRAM) }
-                            else { Text("VRAM — / \(MetricFormat.gb(gpu.totalVRAM)) GB") }
-                            if gpu.isUnified, let limit = gpu.workingSetLimit {
-                                Text(L("Рекомендованный лимит Metal: \(MetricFormat.gb(limit)) GB")).font(.caption)
-                            }
-                            Text(L("Load \(MetricFormat.percent(gpu.utilization)) · \(MetricFormat.temperature(model.snapshot?.gpuTemperature))"))
-                            if let issue = gpu.issue { Text(L10n.text(issue)).font(.caption).foregroundStyle(.secondary) }
-                        } else { Text("—") }
+                    ForEach(graphics) { gpu in
+                        card(gpu.name, icon: "display") {
+                            GPUCardContent(gpu: gpu)
+                        }
                     }
                     card(L("Storage /"), icon: "internaldrive") {
                         if let disk = model.snapshot?.storage {
@@ -85,6 +85,7 @@ struct DashboardView: View {
                     }
                 }
                 card(L("CPU & GPU · 60 seconds"), icon: "waveform.path.ecg") {
+                    Text(model.snapshot?.gpu.name ?? "GPU").font(.caption).foregroundStyle(.secondary)
                     Chart(model.history) { point in
                         if let cpu = point.cpu {
                             LineMark(x: .value(L("Time"), point.date), y: .value(L("Load"), cpu))
@@ -106,7 +107,7 @@ struct DashboardView: View {
                     Picker(L("Sort"), selection: $rankByMemory) {
                         Text("CPU").tag(false)
                         Text("RAM").tag(true)
-                    }.pickerStyle(.segmented).frame(width: 160)
+                    }.labelsHidden().pickerStyle(.segmented).frame(width: 160)
                 }
                 GeometryReader { geometry in
                     ScrollView(.horizontal) {
@@ -171,6 +172,7 @@ struct DashboardView: View {
     private func card<Content: View>(_ title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Label(L10n.text(title), systemImage: icon).font(.headline).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             content()
             Spacer(minLength: 0)
         }

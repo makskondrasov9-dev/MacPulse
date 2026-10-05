@@ -20,8 +20,8 @@ struct MenuBarView: View {
             if let memory = model.snapshot?.memory {
                 MetricGauge(title: "RAM", used: memory.used, total: memory.total)
             } else { LabeledContent("RAM", value: "—") }
-            if let gpu = model.snapshot?.gpu, let used = gpu.usedVRAM {
-                MetricGauge(title: L("VRAM In-Use"), used: used, total: gpu.totalVRAM)
+            if let gpu = model.snapshot?.gpu, let used = gpu.usedVRAM, let total = gpu.totalVRAM {
+                MetricGauge(title: L("VRAM In-Use"), used: used, total: total)
             } else { LabeledContent("VRAM", value: "—") }
             if let disk = model.snapshot?.storage {
                 MetricGauge(title: L("Диск"), used: disk.used, total: disk.total)
@@ -49,9 +49,33 @@ struct MetricGauge: View {
     var body: some View {
         let _ = presentationLocale
         VStack(alignment: .leading, spacing: 6) {
-            LabeledContent(L10n.text(title), value: "\(MetricFormat.gb(used)) / \(MetricFormat.gb(total)) GB")
+            Text(L10n.text(title)).fixedSize(horizontal: false, vertical: true)
+                .foregroundStyle(.secondary)
+            MemoryAmountView(used: used, total: total)
             ProgressView(value: total > 0 ? min(Double(used) / Double(total), 1) : 0)
                 .accessibilityLabel(title)
         }
+    }
+}
+
+
+/// Separate text runs keep used / total in the same order even with Arabic numerals.
+struct MemoryAmountView: View {
+    let used: UInt64?
+    let total: UInt64?
+    @Environment(\.locale) private var presentationLocale
+
+    var body: some View {
+        let _ = presentationLocale
+        HStack(spacing: 4) {
+            Text(used.map(MetricFormat.gb) ?? "—")
+            Text("/")
+            Text(total.map(MetricFormat.gb) ?? "—")
+            Text("GB")
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
