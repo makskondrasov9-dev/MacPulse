@@ -8,6 +8,7 @@ public actor MetricCollector {
     private var gpu = GPUService()
     private let battery = BatteryService()
     private let storage = StorageService()
+    private var network = NetworkMonitorService()
     private var processes = ProcessService()
 
     public init() {}
@@ -20,7 +21,7 @@ public actor MetricCollector {
         #endif
         let graphics = gpu.sampleAll()
         return MonitorSnapshot(battery: battery.sample(), hardware: .current, thermalState: HardwareProfile.thermalState, date: Date(), cpu: cpu.sample(), memory: memory.sample(), gpu: graphics.first ?? GPUService.unavailable, gpus: graphics,
-                               storage: storage.sample(), uptime: CPUService.uptime(), temperatures: temperatures,
+                               network: network.sample(), storage: storage.sample(), uptime: CPUService.uptime(), temperatures: temperatures,
                                processes: processes.sample())
     }
 

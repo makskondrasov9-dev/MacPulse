@@ -31,4 +31,11 @@ typedef struct {
     uint32_t data32;
     uint8_t bytes[32];
 } MonitorSMCMessage;
+// Caller owns *result and releases it with free(). A nonzero return is errno.
+typedef struct {
+    char name[16]; // IF_NAMESIZE on Darwin
+    uint32_t index;
+    uint64_t received, sent;
+} MonitorNetworkCounter;
+int MonitorCopyNetworkCounters(MonitorNetworkCounter **result, size_t *count);
 #endif

@@ -71,6 +71,9 @@ struct DashboardView: View {
                             GPUCardContent(gpu: gpu)
                         }
                     }
+                    card(L("Сеть"), icon: "network") {
+                        NetworkCardContent(network: model.snapshot?.network ?? NetworkMetrics())
+                    }
                     card(L("Storage /"), icon: "internaldrive") {
                         if let disk = model.snapshot?.storage {
                             MetricGauge(title: L("Volume"), used: disk.used, total: disk.total)

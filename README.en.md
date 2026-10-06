@@ -26,6 +26,12 @@ MacPulse runs locally, without an account, ads, telemetry or runtime translation
 
 Custom control requires administrator authorization through macOS. No permanent service is installed. A session helper restores original minimum speeds on quit, sleep or loss of connection. Do not run other fan controllers at the same time. Force-killing the helper itself can leave an elevated minimum until a restart; macOS can still increase speeds for cooling.
 
+## Network and startup
+
+The Network card shows download/upload rates and session totals for connected Wi-Fi and Ethernet interfaces, including local-network traffic. VPN, loopback and AirDrop counters are excluded to avoid double counting. Totals reset when MacPulse restarts. Interface changes and counter resets start a fresh baseline.
+
+In Settings, choose **Full** or **Compact** menu bar text, enable network speed in the menu bar, or turn on **Launch at login**. Install the app in Applications first. If macOS requires approval, use the button to open Login Items settings.
+
 ## Development
 
 See [development instructions](docs/DEVELOPMENT.md) for SwiftPM builds, tests and packaging. Translations are committed JSON resources. Translation corrections and bug reports are welcome.

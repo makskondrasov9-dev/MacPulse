@@ -1,6 +1,7 @@
 import MonitorCore
 import AppKit
 import SwiftUI
+import ServiceManagement
 
 struct SettingsView: View {
     @ObservedObject var model: MonitorModel
@@ -12,6 +13,9 @@ struct SettingsView: View {
     @AppStorage("showGPUPercentage") private var showGPU = false
     @AppStorage("showCPUTemperature") private var showTemperature = false
     @AppStorage("menuBarGPUUsesVRAM") private var gpuUsesVRAM = false
+    @AppStorage("menuBarTextStyle") private var menuBarStyle = "full"
+    @AppStorage("showNetworkSpeed") private var showNetwork = false
+    @StateObject private var loginItem = LoginItemService()
     @AppStorage("pollingInterval") private var pollingInterval = 2.0
     @State private var access: DiskAccessProbe.Status = .unknown
     @State private var checkingAccess = false
@@ -32,6 +36,26 @@ struct SettingsView: View {
                 Text(L("Язык меняется сразу. Названия процессов и пути к файлам сохраняются в оригинале."))
                     .font(.caption).foregroundStyle(.secondary)
             }
+            Section(L("Автозапуск")) {
+                Toggle(L("Запускать при входе в систему"), isOn: Binding(
+                    get: { loginItem.isEnabled },
+                    set: { enabled in Task { await loginItem.setEnabled(enabled) } }
+                ))
+                .disabled(loginItem.isUpdating)
+                if loginItem.status == .requiresApproval {
+                    Text(L("Разрешите автозапуск MacPulse в Системных настройках."))
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button(L("Открыть настройки автозапуска")) { loginItem.openSettings() }
+                }
+                if loginItem.status == .notFound {
+                    Text(L("Для автозапуска переместите MacPulse в «Программы» и запустите оттуда."))
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if let error = loginItem.errorMessage {
+                    Text(L("Не удалось изменить автозапуск: \(error)"))
+                        .font(.caption).foregroundStyle(.red)
+                }
+            }
             Section(L("Оформление")) {
                 Picker(L("Тема"), selection: $appearance) {
                     Text(L("Как в системе")).tag("system")
@@ -40,6 +64,10 @@ struct SettingsView: View {
                 }
             }
             Section(L("Строка меню")) {
+                Picker(L("Стиль текста"), selection: $menuBarStyle) {
+                    Text(L("Полный")).tag("full")
+                    Text(L("Компактный")).tag("compact")
+                }
                 Toggle(L("Показывать иконку"), isOn: $showIcon)
                 Toggle(L("Процент CPU"), isOn: $showCPU)
                 Toggle(L("Процент RAM"), isOn: $showRAM)
@@ -51,6 +79,7 @@ struct SettingsView: View {
                     }
                 }
                 Toggle(L("Температура CPU"), isOn: $showTemperature)
+                Toggle(L("Скорость сети"), isOn: $showNetwork)
                 LabeledContent(L("Предпросмотр")) { MenuBarLabel(model: model) }
                 Text(L("Если отключить все элементы, значок останется, чтобы меню было доступно."))
                     .font(.caption).foregroundStyle(.secondary)
@@ -80,8 +109,9 @@ struct SettingsView: View {
             if value != normalized { pollingInterval = normalized }
             model.setPollingInterval(normalized)
         }
-        .task { await checkAccess() }
+        .task { loginItem.refresh(); await checkAccess() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            loginItem.refresh()
             Task { await checkAccess() }
         }
     }

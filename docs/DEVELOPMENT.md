@@ -122,3 +122,23 @@ GPU его старая история очищается, история CPU с
 [hasUnifiedMemory](https://developer.apple.com/documentation/metal/mtldevice/hasunifiedmemory),
 [recommendedMaxWorkingSetSize](https://developer.apple.com/documentation/metal/mtldevice/recommendedmaxworkingsetsize).
 Последнее — рекомендованный рабочий объём Metal, а не физический размер VRAM.
+
+## Сеть и автозапуск в 0.7
+
+`NetworkMonitorService` читает `NET_RT_IFLIST2` / `if_data64` через небольшой C-мост
+и использует SystemConfiguration для определения Wi-Fi/Ethernet. `SIOCGIFMEDIA`
+исключает отключённые порты с выставленным IFF_RUNNING. Скорость — разница
+счётчиков за фактический интервал монотонного времени; отдельного таймера нет.
+Тесты покрывают 64-битные значения, несколько интерфейсов, переподключение,
+сброс счётчиков и ошибку чтения. Сессия начинается с первого успешного замера;
+трафик в промежутках без надёжной точки отсчёта не оценивается задним числом.
+
+`LoginItemService` использует `SMAppService.mainApp`; status == .enabled — единственный
+источник включённого состояния. Register/unregister выполняются только по действию
+пользователя. Unit-тесты подменяют системный сервис и не меняют автозапуск на машине CI.
+Реальный запуск после входа требует проверки установленного .app в отдельной сессии macOS.
+
+`ByteSizeFormat` использует адаптивный ByteCountFormatter; для выбранной локали
+применяется ByteCountFormatStyle, поскольку у ByteCountFormatter нет свойства locale.
+[Форматирование Apple](https://developer.apple.com/documentation/foundation/bytecountformatter/isadaptive),
+[регистрация автозапуска](https://developer.apple.com/documentation/servicemanagement/smappservice/register()).

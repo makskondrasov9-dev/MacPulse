@@ -166,7 +166,7 @@ struct CleanerView: View {
                   systemImage: result.cancelled ? "pause.circle" : "checkmark.circle.fill")
                 .font(.title2.bold()).foregroundStyle(result.cancelled ? Color.secondary : Color.accentColor)
             if let free = result.availableSpaceIncrease {
-                Text(L("Освобождено \(Double(free) / 1_000_000_000, specifier: "%.2f") ГБ"))
+                Text(L("Освобождено \(free.cleanerSize)"))
                     .font(.largeTitle.bold()).foregroundStyle(Color.accentColor)
             }
             Text(L("Удалено \(result.removedFiles) файлов · \(result.removedBytes.cleanerSize)"))
