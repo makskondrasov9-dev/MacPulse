@@ -6,6 +6,7 @@ struct HistoryPoint: Identifiable {
     let date: Date
     let cpu: Double?
     let gpu: Double?
+    var network: Double? = nil
     var id: Date { date }
 }
 
@@ -27,6 +28,7 @@ final class MonitorModel: ObservableObject {
 
     let cleaner = CleanerModel()
     let fans = FanModel()
+    let uninstaller = UninstallerModel()
     private let collector = MetricCollector()
     private var polling: Task<Void, Never>?
 
@@ -49,6 +51,7 @@ final class MonitorModel: ObservableObject {
     func stop() async {
         await fans.stop()
         await cleaner.stop()
+        await uninstaller.stop()
         polling?.cancel()
         await polling?.value
         polling = nil
@@ -57,10 +60,11 @@ final class MonitorModel: ObservableObject {
     private func accept(_ snapshot: MonitorSnapshot) {
         if let previous = self.snapshot, previous.gpu.id != snapshot.gpu.id {
             // A newly connected primary GPU must not inherit another device's chart values.
-            history = history.map { HistoryPoint(date: $0.date, cpu: $0.cpu, gpu: nil) }
+            history = history.map { HistoryPoint(date: $0.date, cpu: $0.cpu, gpu: nil, network: $0.network) }
         }
         self.snapshot = snapshot
-        history.append(HistoryPoint(date: snapshot.date, cpu: snapshot.cpu?.usage, gpu: snapshot.gpu.utilization))
+        history.append(HistoryPoint(date: snapshot.date, cpu: snapshot.cpu?.usage, gpu: snapshot.gpu.utilization,
+            network: snapshot.network.downloadBytesPerSecond.flatMap { down in snapshot.network.uploadBytesPerSecond.map { down + $0 } }))
         history.removeAll { $0.date < snapshot.date.addingTimeInterval(-60) }
     }
 }

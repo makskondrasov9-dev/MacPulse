@@ -14,6 +14,8 @@ struct SettingsView: View {
     @AppStorage("showCPUTemperature") private var showTemperature = false
     @AppStorage("menuBarGPUUsesVRAM") private var gpuUsesVRAM = false
     @AppStorage("menuBarTextStyle") private var menuBarStyle = "full"
+    @AppStorage("showCPUChart") private var showCPUChart = true
+    @AppStorage("showNetworkChart") private var showNetworkChart = false
     @AppStorage("showNetworkSpeed") private var showNetwork = false
     @StateObject private var loginItem = LoginItemService()
     @AppStorage("pollingInterval") private var pollingInterval = 2.0
@@ -64,9 +66,14 @@ struct SettingsView: View {
                 }
             }
             Section(L("Строка меню")) {
-                Picker(L("Стиль текста"), selection: $menuBarStyle) {
-                    Text(L("Полный")).tag("full")
-                    Text(L("Компактный")).tag("compact")
+                Picker(L("Стиль текста"), selection: Binding(get: { MenuBarDisplayMode.resolve(menuBarStyle).rawValue }, set: { menuBarStyle = $0 })) {
+                    ForEach(MenuBarDisplayMode.allCases) { mode in Text(mode.title).tag(mode.rawValue) }
+                }
+                if MenuBarDisplayMode.resolve(menuBarStyle).hasChart {
+                    Toggle(L("График CPU"), isOn: $showCPUChart)
+                    Toggle(L("График сети"), isOn: $showNetworkChart)
+                    Text(L("Сеть: сумма загрузки и отправки, масштаб по последним 12 замерам."))
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Toggle(L("Показывать иконку"), isOn: $showIcon)
                 Toggle(L("Процент CPU"), isOn: $showCPU)

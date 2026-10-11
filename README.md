@@ -1,99 +1,126 @@
 <div align="center">
-  <img src="Assets/AppIcon.png" width="128" alt="MacPulse">
-  <h1>MacPulse</h1>
-  <p>Показатели Mac в строке меню. Очистка диска — в одном окне.</p>
-  <p><b>macOS 14+ · Intel и Apple Silicon · 12 языков интерфейса</b></p>
+  <img src="Assets/AppIcon.png" width="112" alt="MacPulse icon">
+  <h1>MacPulse 0.8.0</h1>
+  <p>A native Mac monitor, cleaner and app uninstaller.<br>Нативный монитор Mac, клинер и деинсталлятор.</p>
+
+  <a href="https://github.com/makskondrasov9-dev/MacPulse/releases"><img src="https://img.shields.io/github/v/release/makskondrasov9-dev/MacPulse" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-blue" alt="macOS 14+">
+  <img src="https://img.shields.io/badge/Universal-x86__64%20%2F%20arm64-blueviolet" alt="Universal Binary x86_64 / arm64">
+  <img src="https://img.shields.io/badge/Languages-12-green" alt="12 languages">
+  <a href="https://github.com/makskondrasov9-dev/MacPulse/actions/workflows/ci.yml"><img src="https://github.com/makskondrasov9-dev/MacPulse/actions/workflows/ci.yml/badge.svg" alt="Build and tests"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"></a>
 </div>
 
-[English](README.en.md) · Русский
+<p align="center"><a href="#english">English</a> · <a href="#русский">Русский</a> · <a href="#languages--языки">Languages / Языки</a></p>
 
-## Скачать и установить
+## English
 
-**[Скачать MacPulse.dmg](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** · [Все версии](https://github.com/makskondrasov9-dev/MacPulse/releases)
+**[Download the latest MacPulse.dmg](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** · [Release notes](https://github.com/makskondrasov9-dev/MacPulse/releases) · [Changelog](CHANGELOG.md)
 
-1. Откройте скачанный DMG.
-2. Перетащите **MacPulse** в **Applications / Программы**.
-3. Запустите MacPulse. Нажмите на показатель CPU в строке меню → **Открыть MacPulse**.
+### Features
 
-Терминал, Xcode и регистрация для работы приложения не нужны.
+| Module | What it does |
+| --- | --- |
+| System monitor | CPU, memory, storage, multiple GPUs, network rates and session totals. Battery appears only on supported laptops. |
+| Menu bar | Classic or compact text, CPU/network sparklines, or chart + text. Choose each metric; classic text remains the default. |
+| Fans | Read available fan sensors. Supported Intel Macs can use automatic mode, a minimum speed or a temperature curve. |
+| Smart Cleaner | Quick cleanup and an itemized manual mode for browser caches, video/audio tools, games, development tools, logs and Trash. |
+| App Uninstaller | Discover apps in Applications or drop an .app. Preview the bundle and matching user-library files, review sizes and confirm permanent removal. |
+| SSD health | Show available SMART status, remaining life and lifetime writes for supported NVMe and Samsung 860/870 EVO SATA drives. Unsupported readings stay hidden. |
+| Preferences | 12 languages, light/dark/system appearance, native launch at login and adjustable polling interval. |
 
-**Первый запуск:** текущая версия пока не подписана Developer ID и не заверена Apple.
-Если macOS блокирует открытие, после попытки запуска перейдите в
-**Системные настройки → Конфиденциальность и безопасность → Всё равно открыть**.
-Разрешайте запуск только для загрузки, которой доверяете. [Инструкция Apple](https://support.apple.com/102445).
+### Install or update
 
-## Что умеет
+1. Download **MacPulse.dmg** from the latest release.
+2. Quit your existing MacPulse before updating.
+3. Open the DMG and drag **MacPulse** into **Applications**, replacing the previous version if needed.
+4. Open MacPulse. Click its menu bar indicator → **Open MacPulse**.
 
-- **Строка меню:** выбирайте сочетание значка, CPU, RAM, GPU/VRAM, температуры CPU и скорости сети. Полный или компактный стиль текста.
-- **Сеть:** скорости загрузки и отправки, активные Wi-Fi/Ethernet-интерфейсы и суммарный трафик за сессию.
-- **Автозапуск:** включается в настройках и управляется macOS.
-- **Монитор:** графики нагрузки, память, свободное место и десять активных процессов. Нажмите на строку, чтобы узнать о процессе и запросить завершение. Отдельная кнопка в таблице тоже доступна; перед завершением требуется подтверждение.
-- **Вентиляторы:** отдельная вкладка при обнаружении датчиков. На поддерживаемых Intel Mac — автоматический режим, минимальные обороты и плавная температурная зависимость.
-- **Язык:** русский, английский, испанский, французский, немецкий, португальский (Бразилия), итальянский, китайский (упрощённый), японский, корейский, арабский и хинди. Выбор в настройках применяется сразу; есть режим «Как в системе».
-- **Темы:** как в системе, светлая или тёмная; выбор сохраняется.
-- **Батарея:** заряд и доступные сведения об аккумуляторе на ноутбуках. На настольных Mac карточка скрыта.
-- **Быстрая очистка:** кэши приложений и браузеров, логи, отчёты о сбоях и Корзина.
-- **Ручная очистка:** предварительный просмотр категорий и размеров, выбор файлов перед удалением.
-- **Настройки:** частота обновления от 1 до 3 секунд, состав строки меню и доступ к диску.
+Requires **macOS Sonoma 14 or later**. One installer supports Intel and Apple Silicon. No Terminal, Xcode or account is needed. Your preferences survive updates.
 
-Приложение работает локально: без учётной записи, рекламы, телеметрии и отправки данных.
+The app currently uses an ad-hoc signature; it does **not** have Developer ID signing or Apple notarization. If macOS blocks it, try opening it, then use **System Settings → Privacy & Security → Open Anyway**, only if you trust the download. [Apple's instructions](https://support.apple.com/102445). Release assets include `SHA256SUMS`.
 
-## Управление процессами и вентиляторами
+### Know what is removed
 
-«Завершить» отправляет процессу запрос завершения. Несохранённые данные могут быть потеряны;
-системные службы могут перезапуститься автоматически. Критические процессы защищены.
-MacPulse не повышает права для завершения процессов: службы другого пользователя могут быть недоступны.
+- Quick Clean permanently empties accessible Trash items along with caches and logs. Use manual cleanup to choose categories.
+- The uninstaller removes **only checked paths**. App data can contain projects, documents and settings. Name-only matches start unchecked; shared folders and unidentified leftovers are preserved. It cannot guarantee that every file an app has ever created will be found.
+- System apps, MacPulse itself and running apps are protected. No privilege escalation is used for uninstalling. Files that changed after preview require another scan.
+- Full Disk Access is optional. Protected containers may be inaccessible; the preview reports skipped paths.
 
-Вентиляторы по умолчанию контролирует macOS. Пользовательские режимы задают **минимальные обороты**:
-система может поднять их выше при нагреве. Выключить вентилятор или снизить его ниже исходного минимума нельзя.
-Для записи параметров macOS запрашивает пароль администратора. Отдельный помощник
-восстанавливает исходный минимум после выхода, сна или потери связи с приложением.
-После перезапуска действует автоматика. Не используйте одновременно другие утилиты управления вентиляторами.
+### Hardware and measurement notes
 
-Управление проверено на Intel iMac 2017. На Apple Silicon пока доступно только чтение
-оборотов, если драйвер публикует датчики. На Mac без вентиляторов вкладка скрыта.
-При принудительном уничтожении самого помощника повышенный минимум может сохраниться до перезагрузки;
-штатное право системы увеличить обороты остаётся включённым.
+Monitoring has been exercised on an Intel iMac 2017. Available GPU, fan and SMART counters depend on the device, driver and adapter. Apple Silicon fan control remains read-only. SMART is read for the **boot volume's physical drive**, at most once every five minutes; USB adapters may not expose it. Estimated remaining life is a vendor metric, not a guarantee against failure.
 
-## Перед очисткой
+Network totals include local traffic on active physical Wi-Fi/Ethernet interfaces. VPN and loopback counters are excluded to prevent double counting. Totals reset when MacPulse restarts. The network sparkline combines incoming and outgoing traffic and scales to its last 12 samples.
 
-**Быстрая очистка удаляет содержимое Корзины без дополнительного подтверждения.**
-Проверьте Корзину заранее. Для контроля категорий используйте ручной режим.
+## Русский
 
-Безопасный режим браузеров очищает кэш, сохраняя профили, пароли и авторизации.
-Глубокая очистка включается отдельно: удаление cookies и данных сайтов может завершить сеансы входа.
-Кэш открытых браузеров пропускается. Закройте приложения, чтобы очистить больше файлов.
+**[Скачать актуальный MacPulse.dmg](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** · [Версии и обновления](https://github.com/makskondrasov9-dev/MacPulse/releases) · [История изменений](CHANGELOG.md)
 
-Полный доступ к диску нужен для некоторых защищённых папок. Включить его можно
-кнопкой в настройках MacPulse. Без разрешения монитор работает, а недоступные данные пропускаются.
+### Возможности
 
-## Совместимость
+| Раздел | Что умеет |
+| --- | --- |
+| Монитор | CPU, RAM, диск, несколько видеокарт, скорости сети и трафик за сессию. Аккумулятор отображается только на ноутбуках с доступными показаниями. |
+| Строка меню | Классический или компактный текст, микро-графики CPU/сети либо график с текстом. Стиль и показатели выбирает пользователь. |
+| Вентиляторы | Показания датчиков; на поддерживаемых Intel Mac — автоматика, минимальные обороты и температурная кривая. |
+| Клинер | Быстрая очистка и ручной выбор: браузеры, видео/аудио, игры, инструменты разработки, логи и Корзина. |
+| Деинсталлятор | Список приложений и Drag & Drop .app. Предпросмотр приложения и найденных данных, размеры, чекбоксы и подтверждение удаления. |
+| Здоровье SSD | Доступный SMART-статус, оставшийся ресурс и записанные терабайты для поддерживаемых NVMe и Samsung 860/870 EVO SATA. |
+| Настройки | 12 языков, светлая/тёмная/системная тема, автозапуск и частота опроса. |
 
-| Возможность | Intel | Apple Silicon |
+### Установка и обновление
+
+1. Скачайте **MacPulse.dmg** из последнего релиза.
+2. Перед обновлением завершите работающий MacPulse через меню приложения.
+3. Откройте DMG и перетащите **MacPulse** в **Программы / Applications**, при необходимости заменив предыдущую версию.
+4. Запустите приложение и нажмите на показатель в строке меню → **Открыть MacPulse**.
+
+Нужна **macOS 14 Sonoma или новее**. Один установщик для Intel и Apple Silicon. Терминал, Xcode и регистрация не требуются. Настройки сохраняются.
+
+Приложение пока без Developer ID и нотариального заверения Apple. Если macOS блокирует запуск, после попытки открытия перейдите в **Системные настройки → Конфиденциальность и безопасность → Всё равно открыть**, если доверяете источнику. [Инструкция Apple](https://support.apple.com/102445). В релизе также есть `SHA256SUMS`.
+
+### Удаление данных и совместимость
+
+- Быстрая очистка безвозвратно удаляет доступное содержимое Корзины, кэши и логи. Для выбора категорий используйте ручной режим.
+- Деинсталлятор удаляет **только отмеченные пути**. В данных приложения могут быть проекты, документы и настройки. Совпадения только по названию изначально выключены; общие и неизвестные папки сохраняются. Поиск абсолютно всех файлов, созданных приложением, не гарантируется.
+- Системные и запущенные приложения, а также MacPulse защищены. Повышение прав не используется. Если файлы изменились после предпросмотра, нужно повторить сканирование.
+- Полный доступ к диску необязателен. Недоступные контейнеры и пути перечисляются в предпросмотре.
+- Мониторинг проверялся на Intel iMac 2017. Показатели зависят от драйверов и оборудования. На Apple Silicon вентиляторы доступны только для чтения.
+- SMART относится к физическому диску **загрузочного тома** и читается не чаще раза в пять минут. USB-переходники могут его не предоставлять. Оставшийся ресурс — оценка накопителя; неподдерживаемый бейдж скрывается.
+- Сеть учитывает локальный трафик физических интерфейсов без повторного прибавления VPN/loopback. Счётчики сессии обнуляются при перезапуске. График сети показывает сумму входящей и исходящей скорости за последние 12 замеров.
+
+## Languages / Языки
+
+| Language | Native name | Locale |
 | --- | --- | --- |
-| CPU, RAM, диск, процессы и очистка | Да | Да |
-| Температуры | Если доступны датчики SMC | Системное термосостояние, без °C |
-| GPU и видеопамять | Автоопределение GPU и VRAM через IOKit/Metal; счётчики по доступности драйвера | Общая память и рекомендованный лимит Metal; загрузка по доступности драйвера |
-| Аккумулятор | На ноутбуках, если данные доступны | На ноутбуках, если данные доступны |
+| English | English | `en` |
+| Russian | Русский | `ru` |
+| Spanish | Español | `es` |
+| French | Français | `fr` |
+| German | Deutsch | `de` |
+| Portuguese (Brazil) | Português (Brasil) | `pt-BR` |
+| Italian | Italiano | `it` |
+| Chinese (Simplified) | 简体中文 | `zh-Hans` |
+| Japanese | 日本語 | `ja` |
+| Korean | 한국어 | `ko` |
+| Arabic | العربية | `ar` |
+| Hindi | हिन्दी | `hi` |
 
-Проверено на Intel iMac 2017. Версия для Apple Silicon собирается в составе того же приложения;
-проверка на реальном Apple Silicon пока не выполнена. Недоступные датчики показывают «—».
-Для каждого обнаруженного GPU показывается отдельная карточка. Объём дискретной VRAM читается из данных устройства — фиксированного профиля на 4 ГБ нет. У встроенной графики общая RAM не выдаётся за выделенную VRAM. Отсутствующие счётчики не подменяются оценками. График и строка меню используют первый дискретный GPU, а при его отсутствии — первый обнаруженный; его название указано над графиком.
+Choose a language in Settings; **Follow system** is also available. Arabic uses a right-to-left layout. Translations were prepared with AI assistance and terminology edits, and have not all been reviewed by native speakers. Thanks to the MacPulse contributors; corrections are welcome through issues or pull requests.
 
-## Обновление и помощь
+Выбор языка доступен в настройках, включая «Как в системе». Арабский интерфейс отображается справа налево. Переводы подготовлены с помощью ИИ и редактурой терминов; вычитка носителями всех языков пока не завершена. Спасибо участникам MacPulse — исправления можно предложить через Issues или Pull Request.
 
-Завершите MacPulse через меню, скачайте свежий DMG и замените приложение в «Программах».
-Настройки сохраняются. Если пользовались ранней версией `iMacMonitor.app`, удалите старую
-копию после установки MacPulse, чтобы не запускать обе одновременно.
+## Development / Разработка
 
-[Сообщить о проблеме](https://github.com/makskondrasov9-dev/MacPulse/issues/new?template=bug_report.yml) — укажите модель Mac,
-версию macOS и шаги воспроизведения. Перед публикацией скриншота скройте личные данные.
+Swift 6 · SwiftUI · IOKit · Mach/Darwin · Swift Package Manager.
 
-## Для разработчиков
+[Build and test instructions](docs/DEVELOPMENT.md) · [Uninstaller architecture](docs/UNINSTALLER.md) · [MIT License](LICENSE)
 
-Swift 6, SwiftUI, Charts, Mach/Darwin, IOKit. Внешних библиотек нет.
-[Сборка, тесты и устройство проекта](docs/DEVELOPMENT.md) · [История изменений](CHANGELOG.md)
+```sh
+bash scripts/swift-local.sh test
+bash scripts/build-app.sh
+bash scripts/package-dmg.sh
+```
 
-## Лицензия
-
-[MIT](LICENSE). Можно пользоваться, изменять и распространять с сохранением уведомления об авторстве.
+Tests use temporary fixture apps and files; they do not uninstall your apps or clean your real caches. Hardware checks are opt-in. Contributions and reproducible bug reports are welcome.

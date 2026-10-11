@@ -62,6 +62,7 @@ public struct MonitorSnapshot: Sendable {
     public let gpu: GPUMetrics
     public var gpus: [GPUMetrics] = []
     public var network = NetworkMetrics()
+    public var storageHealth: StorageHealth? = nil
     public let storage: StorageMetrics?
     public let uptime: TimeInterval?
     public let temperatures: [TemperatureReading]

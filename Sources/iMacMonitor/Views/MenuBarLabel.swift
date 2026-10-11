@@ -12,7 +12,11 @@ struct MenuBarLabel: View {
 
     @AppStorage("menuBarTextStyle") private var style = "full"
     @AppStorage("showNetworkSpeed") private var showNetwork = false
-    private var compact: Bool { style == "compact" }
+    @AppStorage("showCPUChart") private var showCPUChart = true
+    @AppStorage("showNetworkChart") private var showNetworkChart = false
+    private var mode: MenuBarDisplayMode { .resolve(style) }
+    private var compact: Bool { mode == .compactText || mode == .chartAndText }
+    private var hasChart: Bool { mode.hasChart && (showCPUChart || showNetworkChart) }
 
     private var components: [String] {
         var values: [String] = []
@@ -42,9 +46,14 @@ struct MenuBarLabel: View {
     var body: some View {
         let _ = presentationLocale
         HStack(spacing: 5) {
-            if showIcon || components.isEmpty { Image(systemName: "desktopcomputer").accessibilityLabel("MacPulse") }
-            if !components.isEmpty { Text(components.joined(separator: compact ? " · " : " | ")).monospacedDigit() }
+            if hasChart {
+                Image(nsImage: SparklineView.image(cpu: showCPUChart ? model.history.map(\.cpu) : nil,
+                    network: showNetworkChart ? model.history.map(\.network) : nil, showIcon: showIcon))
+            } else if showIcon || !mode.hasText || components.isEmpty {
+                Image(systemName: "desktopcomputer").accessibilityLabel("MacPulse")
+            }
+            if mode.hasText && !components.isEmpty { Text(components.joined(separator: compact ? " · " : " | ")).monospacedDigit() }
         }
-        .accessibilityLabel("MacPulse. " + components.joined(separator: ", "))
+        .accessibilityLabel("MacPulse. " + (hasChart ? [showCPUChart ? L("График CPU") : "", showNetworkChart ? L("График сети") : ""].filter { !$0.isEmpty }.joined(separator: ", ") + ". " : "") + components.joined(separator: ", "))
     }
 }

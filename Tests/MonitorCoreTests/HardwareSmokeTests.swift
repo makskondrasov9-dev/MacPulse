@@ -25,6 +25,7 @@ struct HardwareSmokeTests {
         #expect(second.network.isAvailable)
         #expect(second.network.downloadBytesPerSecond.map { $0.isFinite && $0 >= 0 } == true)
         #expect(second.network.uploadBytesPerSecond.map { $0.isFinite && $0 >= 0 } == true)
+        print("Boot volume SMART: \(String(describing: StorageHealthService.readBootVolume()))")
         print("Network: \(second.network)")
         print("Sampling duration: \(elapsed)")
         print("Live CPU: \(usage)%; processes read: \(second.processes.count)")

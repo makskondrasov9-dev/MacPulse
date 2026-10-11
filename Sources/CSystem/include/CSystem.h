@@ -38,4 +38,5 @@ typedef struct {
     uint64_t received, sent;
 } MonitorNetworkCounter;
 int MonitorCopyNetworkCounters(MonitorNetworkCounter **result, size_t *count);
+int MonitorReadSMART(uint32_t service, int nvme, uint8_t *data, int *condition);
 #endif

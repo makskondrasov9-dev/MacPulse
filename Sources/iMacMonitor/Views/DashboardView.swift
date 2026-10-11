@@ -79,6 +79,9 @@ struct DashboardView: View {
                             MetricGauge(title: L("Volume"), used: disk.used, total: disk.total)
                             Text(L("Free \(MetricFormat.gb(disk.free)) GB"))
                                 .font(.caption).foregroundStyle(.secondary)
+                            if let health = model.snapshot?.storageHealth {
+                                StorageHealthBadge(health: health)
+                            }
                             if let temperature = model.snapshot?.temperature(keys: ["TH0P"]),
                                temperature.isFinite, (10...150).contains(temperature) {
                                 Text(L("Drive bay \(MetricFormat.temperature(temperature))"))
