@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "iMacMonitor",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v13)],
     products: [
         .executable(name: "iMacMonitor", targets: ["iMacMonitor"]),
         .executable(name: "MacPulseFanHelper", targets: ["MacPulseFanHelper"]),

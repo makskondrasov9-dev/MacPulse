@@ -33,7 +33,7 @@ struct iMacMonitorApp: App {
                 .environment(\.locale, Locale(identifier: AppLanguage.resolve(language).rawValue))
                 .environment(\.layoutDirection, AppLanguage.resolve(language) == .ar ? .rightToLeft : .leftToRight)
                 .preferredColorScheme(colorScheme)
-                .onChange(of: appearance, initial: true) { _, value in
+                .onInitialChange(of: appearance) { value in
                     NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
                         (value == "light" ? NSAppearance(named: .aqua) : nil)
                 }
@@ -49,7 +49,7 @@ struct iMacMonitorApp: App {
                 .environment(\.locale, Locale(identifier: AppLanguage.resolve(language).rawValue))
                 .environment(\.layoutDirection, AppLanguage.resolve(language) == .ar ? .rightToLeft : .leftToRight)
                 .preferredColorScheme(colorScheme)
-                .onChange(of: appearance, initial: true) { _, value in
+                .onInitialChange(of: appearance) { value in
                     NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
                         (value == "light" ? NSAppearance(named: .aqua) : nil)
                 }

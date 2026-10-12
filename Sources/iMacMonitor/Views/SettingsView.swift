@@ -111,7 +111,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: pollingInterval, initial: true) { _, value in
+        .onInitialChange(of: pollingInterval) { value in
             let normalized = MonitorModel.normalizedInterval(value)
             if value != normalized { pollingInterval = normalized }
             model.setPollingInterval(normalized)

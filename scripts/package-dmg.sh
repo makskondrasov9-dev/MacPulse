@@ -18,7 +18,7 @@ cat > "$STAGING_DIR/Установка.txt" <<'TEXT'
 2. Откройте MacPulse из «Программ».
 3. Нажмите на показатель CPU в строке меню и выберите «Открыть MacPulse».
 
-Требуется macOS 14 Sonoma или новее. Один установщик для Intel и Apple Silicon.
+Требуется macOS 13 Ventura или новее. Один установщик для Intel и Apple Silicon.
 
 Первый запуск
 
@@ -54,7 +54,7 @@ Install MacPulse
 2. Open MacPulse from Applications.
 3. Click the CPU indicator in the menu bar and choose Open MacPulse.
 
-Requires macOS 14 Sonoma or later. One installer for Intel and Apple Silicon.
+Requires macOS 13 Ventura or later. One installer for Intel and Apple Silicon.
 Choose your language in Settings → Application language. Twelve languages are
 included, plus Follow system. Changes apply immediately.
 

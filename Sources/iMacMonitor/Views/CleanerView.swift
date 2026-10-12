@@ -56,11 +56,11 @@ struct CleanerView: View {
                         if !items.isEmpty { categorySection(category, items: items) }
                     }
                     if scan.items.isEmpty {
-                        ContentUnavailableView(L("Данные для очистки не найдены"), systemImage: "checkmark.circle",
+                        CompatibleEmptyState(L("Данные для очистки не найдены"), systemImage: "checkmark.circle",
                             description: Text(L("Проверьте доступ к диску, если ожидали увидеть больше файлов.")))
                     }
                 } else if !model.isBusy && model.result == nil {
-                    ContentUnavailableView(L("Начните со сканирования"), systemImage: "magnifyingglass",
+                    CompatibleEmptyState(L("Начните со сканирования"), systemImage: "magnifyingglass",
                         description: Text(L("Вы увидите пути, размеры и предупреждения до удаления. Ни один файл не удаляется при сканировании.")))
                 }
                 Text(L("Перед удалением закройте приложения, использующие выбранные данные. Ссылки внутри ~/Library/Caches удаляются без перехода к их содержимому. Ссылки вне кэшей, файлы с несколькими жёсткими ссылками и изменённые после сканирования файлы пропускаются. Папки проектов и неизвестные остатки не удаляются целиком."))

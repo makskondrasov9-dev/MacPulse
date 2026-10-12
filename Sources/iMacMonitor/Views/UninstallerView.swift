@@ -122,7 +122,7 @@ struct UninstallerView: View {
                         .font(.title2).foregroundStyle(result.removedItems > 0 ? Color.accentColor : Color.secondary)
                     ForEach(Array(result.issues.enumerated()), id: \.offset) { _, issue in Text(L10n.text(issue)).font(.caption).textSelection(.enabled) }
                 } else {
-                    ContentUnavailableView(L("Выберите приложение"), systemImage: "app.dashed")
+                    CompatibleEmptyState(L("Выберите приложение"), systemImage: "app.dashed")
                 }
             }
             .frame(maxWidth: 850, alignment: .leading)

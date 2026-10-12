@@ -1,6 +1,6 @@
 # Разработка MacPulse
 
-Нужны macOS 14+ и Xcode 16 или совместимые Command Line Tools со Swift 6.
+Приложение запускается на macOS 13+. Для разработки нужны Xcode 16 или совместимые Command Line Tools со Swift 6; требования самой среды разработки к macOS могут быть выше.
 
 ```sh
 swift build
