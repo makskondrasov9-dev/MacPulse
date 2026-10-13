@@ -27,3 +27,19 @@ jobs:
         with:
           name: MacPulse-universal
           path: dist/MacPulse.dmg
+  arm64-tests:
+    name: Native Apple Silicon tests
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ARM runner
+        run: test "$(uname -m)" = arm64
+      - name: Validate translations
+        run: python3 scripts/check-localizations.py
+      - name: Native ARM build and tests
+        run: bash scripts/swift-local.sh test
+      - name: Verify native app resources
+        run: |
+          BIN="$(bash scripts/swift-local.sh build --show-bin-path)"
+          "$BIN/iMacMonitor" --verify-localizations

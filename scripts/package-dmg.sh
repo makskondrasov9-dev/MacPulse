@@ -81,3 +81,5 @@ read-only. macOS retains the ability to increase fan speed for cooling.
 TEXT
 hdiutil create -volname MacPulse -srcfolder "$STAGING_DIR" \
     -format UDZO -ov "$PWD/dist/MacPulse.dmg"
+# Keep the checksum paired with the DMG created by this invocation.
+(cd "$PWD/dist" && LC_ALL=C shasum -a 256 MacPulse.dmg > SHA256SUMS)

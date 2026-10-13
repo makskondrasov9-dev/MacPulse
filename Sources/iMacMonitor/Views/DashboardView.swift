@@ -4,6 +4,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @ObservedObject var model: MonitorModel
+    @AppStorage("hideUnavailableMetrics") private var hideUnavailable = true
     @State private var rankByMemory = false
     @State private var selectedProcess: ProcessMetrics?
     @State private var selection: ProcessMetrics.ID?
@@ -41,8 +42,12 @@ struct DashboardView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 180, maximum: 260), spacing: 16)], spacing: 16) {
                     card("CPU", icon: "cpu") {
                         Text(MetricFormat.percent(model.snapshot?.cpu?.usage)).font(.title.bold())
-                        Text(L("\(ProcessInfo.processInfo.processorCount) logical cores · \(MetricFormat.temperature(model.snapshot?.cpuTemperature))"))
-                            .fixedSize(horizontal: false, vertical: true)
+                        if hideUnavailable && model.snapshot?.cpuTemperature == nil {
+                            Text("CPU × \(ProcessInfo.processInfo.processorCount)")
+                        } else {
+                            Text(L("\(ProcessInfo.processInfo.processorCount) logical cores · \(MetricFormat.temperature(model.snapshot?.cpuTemperature))"))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                         Text(model.snapshot?.hardware.processor ?? "—").font(.caption).foregroundStyle(.secondary)
                     }
                     if model.snapshot?.hardware.isAppleSilicon == true {
@@ -72,7 +77,7 @@ struct DashboardView: View {
                         }
                     }
                     card(L("Сеть"), icon: "network") {
-                        NetworkCardContent(network: model.snapshot?.network ?? NetworkMetrics())
+                        NetworkCardContent(network: model.snapshot?.network ?? NetworkMetrics(), diagnostics: model.diagnostics)
                     }
                     card(L("Storage /"), icon: "internaldrive") {
                         if let disk = model.snapshot?.storage {
@@ -90,6 +95,7 @@ struct DashboardView: View {
                         } else { Text("—") }
                     }
                 }
+                InsightsView(model: model.insights)
                 card(L("CPU & GPU · 60 seconds"), icon: "waveform.path.ecg") {
                     Text(model.snapshot?.gpu.name ?? "GPU").font(.caption).foregroundStyle(.secondary)
                     Chart(model.history) { point in

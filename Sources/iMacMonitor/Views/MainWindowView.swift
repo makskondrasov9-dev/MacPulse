@@ -3,7 +3,7 @@ import MonitorCore
 import SwiftUI
 
 private enum MainSection: String, CaseIterable, Identifiable {
-    case monitor = "Монитор", cleaner = "Очистка", fans = "Вентиляторы", settings = "Настройки", uninstaller = "Деинсталлятор"
+    case monitor = "Монитор", cleaner = "Очистка", fans = "Вентиляторы", settings = "Настройки", uninstaller = "Деинсталлятор", diagnostics = "Diagnostics"
     var id: Self { self }
     var icon: String {
         switch self {
@@ -12,6 +12,7 @@ private enum MainSection: String, CaseIterable, Identifiable {
         case .settings: "gearshape"
         case .fans: "fan"
         case .uninstaller: "trash"
+        case .diagnostics: "testtube.2"
         }
     }
 }
@@ -40,6 +41,7 @@ struct MainWindowView: View {
                     case .settings: SettingsView(model: model)
                     case .fans: FansView(model: fanModel)
                     case .uninstaller: UninstallerView(model: model.uninstaller)
+                    case .diagnostics: DiagnosticsView(model: model.diagnostics)
                     }
                 }
                 .navigationTitle(L10n.text((selection ?? .monitor).rawValue))

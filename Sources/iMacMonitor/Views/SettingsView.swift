@@ -87,6 +87,7 @@ struct SettingsView: View {
                 }
                 Toggle(L("Температура CPU"), isOn: $showTemperature)
                 Toggle(L("Скорость сети"), isOn: $showNetwork)
+                NetworkIdentitySettings(model: model.diagnostics)
                 LabeledContent(L("Предпросмотр")) { MenuBarLabel(model: model) }
                 Text(L("Если отключить все элементы, значок останется, чтобы меню было доступно."))
                     .font(.caption).foregroundStyle(.secondary)
@@ -143,5 +144,30 @@ struct SettingsView: View {
             return
         }
         settingsError = nil
+    }
+}
+
+
+private struct NetworkIdentitySettings: View {
+    @ObservedObject var model: DiagnosticsModel
+    @AppStorage("showMenuBarIP") private var showIP = false
+    @AppStorage("showMenuBarVPN") private var showVPN = false
+    @AppStorage("menuBarIPSource") private var ipSource = "local"
+    @AppStorage("hideUnavailableMetrics") private var hideUnavailable = true
+    var body: some View {
+        Toggle(L("IP in menu bar"), isOn: $showIP)
+        if showIP {
+            Picker(L("IP source"), selection: $ipSource) {
+                Text(L("Local IP")).tag("local")
+                Text(L("Public IP")).tag("public")
+            }
+            if ipSource == "public" {
+                Toggle(L("Public IP history (ipify)"), isOn: $model.publicIPEnabled)
+                Text(L("Public IP lookup uses ipify. Enable it to check every 60 seconds.")).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        Toggle(L("VPN indicator in menu bar"), isOn: $showVPN)
+        Text(L("VPN detection is based on tunnel interfaces with an assigned IP; it does not guarantee traffic protection.")).font(.caption).foregroundStyle(.secondary)
+        Toggle(L("Hide unavailable values"), isOn: $hideUnavailable)
     }
 }

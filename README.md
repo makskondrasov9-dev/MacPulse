@@ -13,7 +13,7 @@
 
 MacPulse brings your Mac's everyday maintenance tools together in one Swift + SwiftUI app. See what is busy, inspect both GPUs, watch network traffic, manage supported fans, review caches and uninstall apps — without a subscription or an account.
 
-Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **0.8.1** lowers the deployment target to Ventura.
+Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **0.9.0** adds hardware diagnostics, network identity and session insights, retaining the Ventura deployment target introduced in 0.8.1.
 
 ![MacPulse dashboard with CPU, memory, two GPUs, network and history charts](docs/screenshots/dashboard.png)
 
@@ -23,11 +23,13 @@ Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon an
 | --- | --- |
 | **System Monitor** | CPU, RAM, top processes with descriptions and confirmed termination, storage, network rates and session totals. Battery information appears on laptops. |
 | **Multi-GPU** | Separate AMD and Intel cards, detected VRAM capacity, shared-memory reporting on integrated GPUs and Apple Silicon. No hard-coded 4 GB limit. |
-| **Menu bar** | Classic text, compact text, 12-point sparklines or charts + text. Choose CPU/network charts and individual metrics. |
+| **Menu bar** | Classic text, compact text, 12-point sparklines or charts + text. Choose metrics, local/public IP and a VPN/tunnel indicator. |
 | **Fans** | Automatic mode, minimum RPM and temperature-dependent curves on supported Intel hardware, with an explicitly authorized helper. Fanless Macs hide this section. |
 | **Smart Cleaner** | Browser cache, video/audio/development/game caches, logs and more. Manual preview and category selection, plus Quick Clean. |
 | **App Uninstaller** | Installed-app list, drag & drop, related-file sizes and individual checkboxes. Protects system apps, running apps, MacPulse and shared data used by duplicate installations. |
 | **Storage Health** | Available SMART status, SSD life and lifetime writes on supported NVMe and Samsung 860/870 EVO drives. |
+| **Diagnostics** | Cancellable 1 GB disk benchmark, CPU and Metal GPU stress tests, full-screen pixel inspector and native networkQuality speed testing. |
+| **Insights & identity** | Session peaks, opt-in foreground-app time, local IP/MAC, optional public-IP history and a compact network view that hides service-only interfaces. |
 | **Native integration** | System/light/dark appearance, launch at login, 1–3 second polling and 12 languages including Arabic RTL. |
 
 **Hardware support is capability-based.** Apple Silicon fan control is currently read-only; system-wide GPU utilization and numeric CPU temperature are not available there through the implemented public fallback. Its thermal state is shown instead. SMART may be unavailable through USB adapters or multi-store configurations. Unknown readings are hidden, not invented. Universal compilation is not a claim that every M1–M4 or Intel model has been physically tested.
@@ -98,7 +100,8 @@ On Homebrew versions that require explicit trust for third-party casks, review [
 - Safe browser mode excludes profiles, cookies and sessions; deeper cleaning requires confirmation. Open applications can cause skips.
 - Full Disk Access is optional for monitoring. Cleaner and uninstaller access remains subject to macOS permissions; inaccessible items are reported. The Settings indicator is a heuristic, not an authoritative permission API.
 - Fan overrides are session-based. A separate helper requires administrator approval; normal monitoring and app removal do not elevate privileges. macOS thermal protection remains active.
-- There is no analytics service or account. File operations remain local. App removal does not guarantee discovery of every third-party helper or shared file.
+- Public-IP history is opt-in and queries ipify once per minute; the service receives your public IP. Network speed tests use Apple’s networkQuality servers and transfer data. Foreground-app time is opt-in and stored locally.
+- There is no telemetry service or account. File operations remain local. App removal does not guarantee discovery of every third-party helper or shared file.
 
 ## Languages
 
@@ -119,6 +122,10 @@ On Homebrew versions that require explicit trust for third-party casks, review [
 
 Switch languages immediately in Settings or follow the system language. Translations were prepared with AI assistance and terminology edits; native-speaker reviews are welcome.
 
+## Diagnostics in 0.9.0
+
+[Hardware diagnostics and analytics](docs/DIAGNOSTICS.md): cancellable disk/CPU/Metal tests, a display inspector, networkQuality, opt-in public-IP history and foreground-app usage, plus session peaks. IP and tunnel indicators are also available in Monitor and the menu bar. Technical network details and unavailable values can be shown or hidden. A tunnel indicator does not guarantee VPN protection of all traffic.
+
 ## Build and contribute
 
 Swift 6, SwiftUI, Charts, Mach/Darwin, IOKit and Swift Package Manager. A compatible Swift 6 toolchain is required for development; its host requirements differ from the app's macOS 13 deployment target.
@@ -130,7 +137,7 @@ bash scripts/build-app.sh
 bash scripts/package-dmg.sh
 ```
 
-For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. **69 tests** cover metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines and SMART decoding. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
+For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. The **85-test suite** (80 default checks plus five hardware opt-ins) covers metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines and SMART decoding. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
 
 [Development](docs/DEVELOPMENT.md) · [Uninstaller architecture](docs/UNINSTALLER.md) · [Report an issue](https://github.com/makskondrasov9-dev/MacPulse/issues) · [MIT license](LICENSE)
 
@@ -140,7 +147,7 @@ If MacPulse is useful to you, a GitHub star helps others find it. Reports with y
 
 **MacPulse — бесплатный нативный набор инструментов для Mac на Swift и SwiftUI.** Мониторинг CPU, RAM, нескольких GPU и сети, управление поддерживаемыми вентиляторами, очистка и удаление приложений собраны в одном окне. Без подписок, рекламы и телеметрии; исходники под MIT.
 
-Проект вырос из утилиты для iMac 2017. В версии **0.8.1** минимальная система снижена до **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
+Проект вырос из утилиты для iMac 2017. Версия **0.9.0** добавляет диагностику диска, CPU/GPU, экрана и сети, аналитику и IP/VPN в строке меню. Минимальная система — **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
 
 **[Скачать установщик](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** → открыть DMG → перетащить MacPulse в «Программы». Перед обновлением завершите старую копию. Для Homebrew используйте команды из раздела Install выше.
 

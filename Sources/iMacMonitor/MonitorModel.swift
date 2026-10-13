@@ -26,6 +26,8 @@ final class MonitorModel: ObservableObject {
         pollingInterval = Self.normalizedInterval(value)
     }
 
+    let diagnostics = DiagnosticsModel()
+    let insights = InsightsModel()
     let cleaner = CleanerModel()
     let fans = FanModel()
     let uninstaller = UninstallerModel()
@@ -37,6 +39,8 @@ final class MonitorModel: ObservableObject {
         fans.start()
         let collector = collector
         polling = Task { [weak self] in
+            await self?.diagnostics.load()
+            await self?.insights.load()
             while !Task.isCancelled {
                 let snapshot = await collector.sample()
                 guard !Task.isCancelled else { break }
@@ -49,12 +53,15 @@ final class MonitorModel: ObservableObject {
     }
 
     func stop() async {
-        await fans.stop()
-        await cleaner.stop()
-        await uninstaller.stop()
         polling?.cancel()
         await polling?.value
         polling = nil
+        DisplayTestController.shared.close()
+        await diagnostics.stop()
+        await insights.stop()
+        await fans.stop()
+        await cleaner.stop()
+        await uninstaller.stop()
     }
 
     private func accept(_ snapshot: MonitorSnapshot) {
@@ -62,6 +69,8 @@ final class MonitorModel: ObservableObject {
             // A newly connected primary GPU must not inherit another device's chart values.
             history = history.map { HistoryPoint(date: $0.date, cpu: $0.cpu, gpu: nil, network: $0.network) }
         }
+        diagnostics.sample(snapshot)
+        insights.sample(snapshot)
         self.snapshot = snapshot
         history.append(HistoryPoint(date: snapshot.date, cpu: snapshot.cpu?.usage, gpu: snapshot.gpu.utilization,
             network: snapshot.network.downloadBytesPerSecond.flatMap { down in snapshot.network.uploadBytesPerSecond.map { down + $0 } }))

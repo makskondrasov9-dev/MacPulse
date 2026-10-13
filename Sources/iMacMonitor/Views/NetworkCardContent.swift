@@ -3,6 +3,7 @@ import SwiftUI
 
 struct NetworkCardContent: View {
     let network: NetworkMetrics
+    @ObservedObject var diagnostics: DiagnosticsModel
     @Environment(\.locale) private var presentationLocale
 
     var body: some View {
@@ -13,6 +14,7 @@ struct NetworkCardContent: View {
                 .fixedSize(horizontal: false, vertical: true)
             reading(L("Загрузка"), symbol: "↓", value: ByteSizeFormat.rate(network.downloadBytesPerSecond))
             reading(L("Отправка"), symbol: "↑", value: ByteSizeFormat.rate(network.uploadBytesPerSecond))
+            NetworkIdentitySummary(model: diagnostics)
             Divider()
             Text(L("За сессию")).font(.caption).foregroundStyle(.secondary)
             reading(L("Получено"), symbol: "↓", value: ByteSizeFormat.string(network.receivedBytes))
@@ -29,5 +31,26 @@ struct NetworkCardContent: View {
                 .environment(\.layoutDirection, .leftToRight)
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Observes identity changes directly, independently of the metric polling loop.
+struct NetworkIdentitySummary: View {
+    @ObservedObject var model: DiagnosticsModel
+    @AppStorage("hideUnavailableMetrics") private var hideUnavailable = true
+    private var network: NetworkPresentation { NetworkPresentation(model.interfaces) }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            if network.localIP != nil || !hideUnavailable { Text(L("Local IP") + ": " + (network.localIP ?? "—")).textSelection(.enabled) }
+            if model.publicIPEnabled {
+                if model.publicIP != nil || !hideUnavailable { Text(L("Public IP") + ": " + (model.publicIP ?? "—")).textSelection(.enabled) }
+            } else {
+                Button(L("Enable public IP") + " (ipify)") { model.publicIPEnabled = true }
+                    .help(L("Public IP lookup uses ipify. Enable it to check every 60 seconds."))
+            }
+            Label(network.hasTunnel ? L("Tunnel detected") : L("No tunnel detected"), systemImage: network.hasTunnel ? "network.badge.shield.half.filled" : "network")
+                .help(L("VPN detection is based on tunnel interfaces with an assigned IP; it does not guarantee traffic protection."))
+            if let ip = network.tunnelIP { Text("VPN IP: " + ip).textSelection(.enabled) }
+        }.font(.caption).fixedSize(horizontal: false, vertical: true)
     }
 }

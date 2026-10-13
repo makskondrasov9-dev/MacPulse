@@ -4,6 +4,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @ObservedObject var model: MonitorModel
+    @AppStorage("hideUnavailableMetrics") private var hideUnavailable = true
     @Environment(\.openWindow) private var openWindow
 
     @Environment(\.locale) private var presentationLocale
@@ -15,14 +16,14 @@ struct MenuBarView: View {
             LabeledContent("CPU", value: MetricFormat.percent(model.snapshot?.cpu?.usage))
             ProgressView(value: (model.snapshot?.cpu?.usage ?? 0) / 100)
                 .accessibilityLabel(L("Загрузка CPU"))
-            LabeledContent("GPU", value: MetricFormat.percent(model.snapshot?.gpu.utilization))
-            LabeledContent(L("Температура CPU"), value: MetricFormat.temperature(model.snapshot?.cpuTemperature))
+            if model.snapshot?.gpu.utilization != nil || !hideUnavailable { LabeledContent("GPU", value: MetricFormat.percent(model.snapshot?.gpu.utilization)) }
+            if model.snapshot?.cpuTemperature != nil || !hideUnavailable { LabeledContent(L("Температура CPU"), value: MetricFormat.temperature(model.snapshot?.cpuTemperature)) }
             if let memory = model.snapshot?.memory {
                 MetricGauge(title: "RAM", used: memory.used, total: memory.total)
-            } else { LabeledContent("RAM", value: "—") }
+            } else if !hideUnavailable { LabeledContent("RAM", value: "—") }
             if let gpu = model.snapshot?.gpu, let used = gpu.usedVRAM, let total = gpu.totalVRAM {
                 MetricGauge(title: L("VRAM In-Use"), used: used, total: total)
-            } else { LabeledContent("VRAM", value: "—") }
+            } else if !hideUnavailable { LabeledContent("VRAM", value: "—") }
             if let disk = model.snapshot?.storage {
                 MetricGauge(title: L("Диск"), used: disk.used, total: disk.total)
             }
