@@ -76,15 +76,15 @@ public actor SMCService {
         nextOpenAttempt = .distantPast
     }
 
-    public func sample() -> [TemperatureReading] {
+    public func sample(keys: [String] = SMCService.keys) -> [TemperatureReading] {
         #if !arch(x86_64)
         return []
         #else
         do { try openIfNeeded() }
         catch {
-            return Self.keys.map { TemperatureReading(key: $0, celsius: nil, issue: String(describing: error)) }
+            return keys.map { TemperatureReading(key: $0, celsius: nil, issue: String(describing: error)) }
         }
-        return Self.keys.map { key in
+        return keys.map { key in
             guard connection != 0 else {
                 return TemperatureReading(key: key, celsius: nil, issue: openIssue)
             }

@@ -30,19 +30,27 @@ import MonitorCore
     }
     private func activationChanged() {
         let app = tracksUsage ? NSWorkspace.shared.frontmostApplication : nil
-        tracker.activate(id: app.map { $0.bundleIdentifier ?? $0.localizedName ?? String($0.processIdentifier) }, name: app?.localizedName ?? "Application", at: Date(), eligible: eligible, usage: &usage)
+        var updated = usage
+        tracker.activate(id: app.map { $0.bundleIdentifier ?? $0.localizedName ?? String($0.processIdentifier) }, name: app?.localizedName ?? "Application", at: Date(), eligible: eligible, usage: &updated)
+        if updated != usage { usage = updated }
     }
-    private func accountUsage(at now: Date) { tracker.tick(at: now, eligible: eligible, usage: &usage) }
+    private func accountUsage(at now: Date) {
+        var updated = usage
+        tracker.tick(at: now, eligible: eligible, usage: &updated)
+        if updated != usage { usage = updated }
+    }
     func sample(_ snapshot: MonitorSnapshot) {
-        peaks.record(temperature: snapshot.cpuTemperature, memory: snapshot.memory?.used,
+        var updatedPeaks = peaks
+        updatedPeaks.record(temperature: snapshot.cpuTemperature, memory: snapshot.memory?.used,
                      gpu: (snapshot.gpus.isEmpty ? [snapshot.gpu] : snapshot.gpus).compactMap(\.utilization).max(), date: snapshot.date)
+        if updatedPeaks != peaks { peaks = updatedPeaks }
         let now = snapshot.date
-        if let previousDate {
+        if let previousDate, !snapshot.processes.isEmpty {
             audit.record(snapshot.processes, elapsed: now.timeIntervalSince(previousDate))
         }
         previousDate = now
         accountUsage(at: now)
-        if now.timeIntervalSince(saved) >= 30 { saved = now; persist() }
+        if tracksUsage && now.timeIntervalSince(saved) >= 30 { saved = now; persist() }
     }
     func clearUsage() { usage = DailyUsage(); tracker.reset(at: Date()); activationChanged(); persist() }
     private func persist() {

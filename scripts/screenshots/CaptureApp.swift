@@ -8,24 +8,55 @@ import MonitorCore
     @State private var started = false
     init() {
         UserDefaults.standard.register(defaults: ["appLanguage": "en", "appearance": "dark", "menuBarTextStyle": "chartAndText", "showCPUChart": true, "showNetworkChart": true])
+        if CommandLine.arguments.contains("--updates-only") {
+            for (key, value) in ["appLanguage": "en", "appearance": "dark", "menuBarTextStyle": "chartAndText", "menuBarColorMode": "accent", "accentColor": "Purple"] { UserDefaults.standard.set(value, forKey: key) }
+            for key in ["publicIPHistory", "trackApplicationUsage", "showMenuBarIP", "showMenuBarVPN"] { UserDefaults.standard.set(false, forKey: key) }
+            for key in ["showCPUPercentage", "showRAMPercentage", "showGPUPercentage", "showCPUChart", "showNetworkChart"] { UserDefaults.standard.set(true, forKey: key) }
+        }
     }
     var body: some Scene {
         WindowGroup("MacPulse") {
             MainWindowView(model: model, fanModel: model.fans)
                 .environment(\.locale, Locale(identifier: "en"))
                 .preferredColorScheme(.dark)
+                .tint((AppAccent(rawValue: UserDefaults.standard.string(forKey: "accentColor") ?? "Blue") ?? .blue).color)
+                .accentColor((AppAccent(rawValue: UserDefaults.standard.string(forKey: "accentColor") ?? "Blue") ?? .blue).color)
                 .task {
                     guard !started else { return }; started = true
                     NSApp.setActivationPolicy(.regular)
                     NSApp.appearance = NSAppearance(named: .darkAqua)
                     model.start()
-                    model.uninstaller.refresh()
-                    try? await Task.sleep(for: .seconds(26))
+                    let updatesOnly = CommandLine.arguments.contains("--updates-only")
+                    if !updatesOnly { model.uninstaller.refresh() }
+                    try? await Task.sleep(for: .seconds(updatesOnly ? 8 : 26))
                     guard let window = NSApp.windows.first(where: { $0.canBecomeMain && $0.frame.width > 500 }) else { exit(1) }
                     window.setContentSize(NSSize(width: 1180, height: 840))
                     window.center()
                     window.makeKeyAndOrderFront(nil)
                     NSApp.activate(ignoringOtherApps: true)
+                    if updatesOnly {
+                        NotificationCenter.default.post(name: .init("MacPulseScreenshotSection"), object: "Настройки")
+                        try? await Task.sleep(for: .seconds(1))
+                        @MainActor func tabs(in view: NSView) -> NSTabView? {
+                            if let tab = view as? NSTabView { return tab }
+                            for child in view.subviews { if let found = tabs(in: child) { return found } }
+                            return nil
+                        }
+                        guard let tab = tabs(in: window.contentView!), tab.numberOfTabViewItems == 4 else { exit(3) }
+                        WidgetPreferences.setMaster(false)
+                        WidgetPreferences.setEnabled(true, kind: .compute)
+                        WidgetPreferences.setEnabled(true, kind: .memory)
+                        DesktopWidgetService.shared.sync(model)
+                        for (index, name) in [(0, "settings-general"), (1, "settings-menubar"), (2, "settings-widgets")] {
+                            window.setContentSize(NSSize(width: 1180, height: index == 2 ? 1120 : 840))
+                            window.center()
+                            tab.selectTabViewItem(at: index)
+                            try? await Task.sleep(for: .seconds(1))
+                            capture(windowID: window.windowNumber, name: name)
+                        }
+                        await model.stop()
+                        exit(0)
+                    }
                     for (section, filename) in [("Монитор", "dashboard"), ("Очистка", "cleaner"), ("Деинсталлятор", "uninstaller"), ("Вентиляторы", "fans")] {
                         NotificationCenter.default.post(name: .init("MacPulseScreenshotSection"), object: section)
                         try? await Task.sleep(for: .seconds(1))

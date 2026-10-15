@@ -48,7 +48,6 @@ struct InsightsView: View {
         if model.peaks.gpuLoad != nil || !hideUnavailable { Text("GPU: " + MetricFormat.percent(model.peaks.gpuLoad)) }
     }
     private func time(_ seconds: Double) -> String {
-        let formatter = DateComponentsFormatter(); formatter.allowedUnits = [.hour, .minute, .second]; formatter.unitsStyle = .abbreviated
-        return formatter.string(from: seconds) ?? "—"
+        ViewFormatters.duration(seconds, locale: locale)
     }
 }

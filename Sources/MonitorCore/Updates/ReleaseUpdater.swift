@@ -23,7 +23,7 @@ public struct AvailableRelease: Sendable {
 }
 
 public enum ReleaseUpdater {
-    public static let developmentVersion = "1.0.0"
+    public static let developmentVersion = "1.0.1"
     public static let endpoint = URL(string: "https://api.github.com/repos/makskondrasov9-dev/MacPulse/releases/latest")!
     public static func latest() async throws -> AvailableRelease {
         let data = try await DiagnosticHTTP.fetch(endpoint, maximumBytes: 2_000_000, headers: ["Accept": "application/vnd.github+json", "User-Agent": "MacPulse"])

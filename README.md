@@ -13,7 +13,7 @@
 
 MacPulse brings your Mac's everyday maintenance tools together in one Swift + SwiftUI app. See what is busy, inspect both GPUs, watch network traffic, manage supported fans, review caches and uninstall apps — without a subscription or an account.
 
-Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **1.0.0** adds floating desktop HUDs, per-process network connections and event-driven foreground app usage, retaining macOS Ventura support.
+Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **1.0.1** adds independent desktop widgets with specialized layouts, consistent menu-bar colors, organized settings and a lighter background collection loop, retaining all 1.0.0 features and macOS Ventura support.
 
 ![MacPulse dashboard with CPU, memory, two GPUs, network and history charts](docs/screenshots/dashboard.png)
 
@@ -23,14 +23,15 @@ Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon an
 | --- | --- |
 | **System Monitor** | CPU, RAM, top processes with descriptions and confirmed termination, storage, network rates and session totals. Battery information appears on laptops. |
 | **Multi-GPU** | Separate AMD and Intel cards, detected VRAM capacity, shared-memory reporting on integrated GPUs and Apple Silicon. No hard-coded 4 GB limit. |
-| **Menu bar** | Classic text, compact text, 12-point sparklines or charts + text. Choose metrics, local/public IP and a VPN/tunnel indicator. |
+| **Menu bar** | Classic text, compact text, 12-point sparklines or charts + text. Monochrome, accent, category or dynamic colors apply to both charts. Choose metrics, IP and a VPN/tunnel indicator. |
+| **Desktop widgets** | Independently enable CPU/GPU, RAM/storage, network and an optional system summary. Small/Medium/Large layouts, opacity, movement locks and saved positions. |
 | **Fans** | Automatic mode, minimum RPM and temperature-dependent curves on supported Intel hardware, with an explicitly authorized helper. Fanless Macs hide this section. |
 | **Smart Cleaner** | Browser cache, video/audio/development/game caches, logs and more. Manual preview and category selection, plus Quick Clean. |
 | **App Uninstaller** | Installed-app list, drag & drop, related-file sizes and individual checkboxes. Protects system apps, running apps, MacPulse and shared data used by duplicate installations. |
 | **Storage Health** | Available SMART status, SSD life and lifetime writes on supported NVMe and Samsung 860/870 EVO drives. |
 | **Diagnostics** | Cancellable 1 GB disk benchmark, CPU and Metal GPU stress tests, full-screen pixel inspector and native networkQuality speed testing. |
 | **Insights & identity** | Session peaks, opt-in foreground-app time, local IP/MAC, optional public-IP history and a compact network view that hides service-only interfaces. |
-| **Native integration** | System/light/dark appearance, launch at login, 1–3 second polling and 12 languages including Arabic RTL. |
+| **Native integration** | System/light/dark appearance, launch at login, organized settings, adaptive polling and 12 languages including Arabic RTL. |
 
 **Hardware support is capability-based.** Apple Silicon fan control is currently read-only; system-wide GPU utilization and numeric CPU temperature are not available there through the implemented public fallback. Its thermal state is shown instead. SMART may be unavailable through USB adapters or multi-store configurations. Unknown readings are hidden, not invented. Universal compilation is not a claim that every M1–M4 or Intel model has been physically tested.
 
@@ -46,7 +47,7 @@ Choose by the job you need done. This is a scope comparison, not a performance b
 | [Macs Fan Control](https://crystalidea.com/macs-fan-control/download) | **Free core**, optional [paid Pro](https://crystalidea.com/macs-fan-control/buy) | Proprietary | Dedicated fan and temperature controls |
 | [AppCleaner](https://freemacsoft.net/appcleaner/) | **Free** | No open-source license advertised | Focused app removal |
 
-Vendor pages checked 12 October 2026. Taxes, region, promotions and upgrades can change prices. See vendor checkout pages for current regional pricing. iStat Menus also supports macOS 13+. MacPulse is a smaller, developing project; hardware coverage and specialized tools differ.
+Comparison recorded 12 October 2026. Taxes, region, promotions and upgrades can change prices. See vendor checkout pages for current regional pricing. iStat Menus also supports macOS 13+. MacPulse is a smaller, developing project; hardware coverage and specialized tools differ.
 
 ## Take a look
 
@@ -100,7 +101,7 @@ On Homebrew versions that require explicit trust for third-party casks, review [
 - Safe browser mode excludes profiles, cookies and sessions; deeper cleaning requires confirmation. Open applications can cause skips.
 - Full Disk Access is optional for monitoring. Cleaner and uninstaller access remains subject to macOS permissions; inaccessible items are reported. The Settings indicator is a heuristic, not an authoritative permission API.
 - Fan overrides are session-based. A separate helper requires administrator approval; normal monitoring and app removal do not elevate privileges. macOS thermal protection remains active.
-- Public-IP history is opt-in and queries ipify once per minute; the service receives your public IP. Network speed tests use Apple’s networkQuality servers and transfer data. Foreground-app time is opt-in and stored locally.
+- Public-IP lookup/history is opt-in, with a configurable HTTPS service and interval (default: ipify every 60 seconds); the selected service receives your public IP. Network speed tests use Apple’s networkQuality servers and transfer data. Foreground-app time is opt-in and stored locally.
 - There is no telemetry service or account. File operations remain local. App removal does not guarantee discovery of every third-party helper or shared file.
 
 ## Languages
@@ -122,9 +123,31 @@ On Homebrew versions that require explicit trust for third-party casks, review [
 
 Switch languages immediately in Settings or follow the system language. Translations were prepared with AI assistance and terminology edits; native-speaker reviews are welcome.
 
-## Flagship features in 1.0.0
+## What's new in 1.0.1
 
-- **Desktop HUDs:** three draggable translucent panels for CPU/GPU sparklines, RAM/disk and network speed. Pin them above the wallpaper or float above windows. Adjust opacity (40–100%), enable click-through, and restore positions on relaunch.
+- **Choose each desktop widget independently.** Enable CPU & GPU, Memory & Storage, Network, or the optional System Summary. Turning one off preserves the other windows. Existing coordinates and per-widget sizes are retained.
+- **Specialized sizes.** CPU/GPU: dual rings, sparklines, then a minute of load history, temperatures, nominal frequency and throttling information. Memory/Storage: dual rings, exact used/total amounts, then memory breakdown and available SMART/life/TBW data. Network: compact speed gauge, combined activity, then separate download/upload histories, IPs and session totals. Summary supports Medium and Large only.
+- **Consistent menu-bar colors.** Accent colors affect both graphs; category mode uses cyan CPU and green network; dynamic mode colors CPU by load and network by recent relative traffic; monochrome follows the foreground appearance. Charts and colored text remain one composition.
+- **Four settings tabs:** General, Menu Bar, Widgets, Network & IP. Sizes and position locks are available here and from each widget's context menu.
+- **More stable scrolling and lighter idle work.** Static dashboard rows retain scroll position through missing-value changes and navigation. Closed-window/menu-only monitoring samples selected services every three seconds; visible windows, popovers and enabled widgets use your chosen 1–3 second interval. Histories are bounded and formatters/images are cached.
+
+<table>
+<tr><td><strong>CPU & GPU · Large</strong><br><img src="docs/screenshots/widgets-cpu-gpu.png" width="330" alt="CPU GPU widget with separate histories, temperatures and nominal clock"></td><td><strong>Memory & Storage · Large</strong><br><img src="docs/screenshots/widgets-memory-storage.png" width="330" alt="RAM breakdown and storage usage; this adapter does not expose SMART"></td></tr>
+<tr><td><strong>Network · Small</strong><br><img src="docs/screenshots/widgets-network.png" width="160" alt="Compact network speed gauge"></td><td><strong>System Summary · Large</strong><br><img src="docs/screenshots/widgets-summary.png" width="330" alt="Optional mixed CPU GPU RAM disk and network summary"></td></tr>
+</table>
+
+### Organized settings
+
+![Menu bar settings with a live colored chart and text preview](docs/screenshots/settings-menubar.png)
+
+![Independent widget controls in Settings](docs/screenshots/settings-widgets.png)
+
+CPU frequency is explicitly **nominal**, not an instantaneous clock. Numeric temperatures, power limits and SMART depend on hardware/API availability. Public IP requires enabling its lookup in Network & IP settings. Network's dynamic color is relative to recent activity, with a 1 MiB/s reference floor; it is not measured link saturation.
+
+[Widget architecture](docs/DESKTOP_WIDGETS.md) · [Measured performance and test limits](docs/PERFORMANCE.md)
+
+## Retained flagship features
+
 - **Process network monitor:** a dedicated Network section lists visible TCP/UDP sockets with PID, app icon, local/remote endpoint and state. Search by app or port and filter remote connections. Polling runs only while this section is open; macOS permissions determine which sockets are visible.
 - **Screen Time Lite:** local, opt-in top-five foreground app usage with colored bars. Activation notifications split time between apps; idle and sleep gaps are excluded. No window titles or document names are recorded.
 - **Session records:** CPU temperature with its peak timestamp, maximum RAM and peak GPU utilization.
@@ -152,7 +175,7 @@ bash scripts/build-app.sh
 bash scripts/package-dmg.sh
 ```
 
-For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. The **112-test suite** (106 default checks plus six hardware opt-ins) covers metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines and SMART decoding. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
+For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. The **122-test suite** (116 default checks plus six hardware/network opt-ins) covers metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines, widget selection/color policies and SMART decoding. `bash scripts/check-optimization.sh --ui-only` additionally checks native windows, independent widget selection, all eleven supported layouts, palette rendering and scroll restoration. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
 
 [Development](docs/DEVELOPMENT.md) · [Uninstaller architecture](docs/UNINSTALLER.md) · [Report an issue](https://github.com/makskondrasov9-dev/MacPulse/issues) · [MIT license](LICENSE)
 
@@ -162,7 +185,11 @@ If MacPulse is useful to you, a GitHub star helps others find it. Reports with y
 
 **MacPulse — бесплатный нативный набор инструментов для Mac на Swift и SwiftUI.** Мониторинг CPU, RAM, нескольких GPU и сети, управление поддерживаемыми вентиляторами, очистка и удаление приложений собраны в одном окне. Без подписок, рекламы и телеметрии; исходники под MIT.
 
-Проект вырос из утилиты для iMac 2017. Версия **1.0.0** добавляет три плавающих виджета, таблицу TCP/UDP-соединений процессов, цветные шкалы времени использования программ и время достижения температурного пика. Диагностика, очистка, деинсталлятор и все прежние возможности сохранены. Минимальная система — **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
+Проект вырос из утилиты для iMac 2017. Версия **1.0.1** добавляет независимый выбор четырёх виджетов, тематические размеры, общую цветовую схему графиков меню-бара и Настройки с четырьмя вкладками. Исправлена прокрутка Монитора, фоновый сбор ограничен выбранными метриками. Таблица TCP/UDP-соединений, учёт времени программ и рекорды сессии сохранены. Диагностика, очистка, деинсталлятор и все прежние возможности сохранены. Минимальная система — **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
+
+**Виджеты:** CPU/GPU — кольца, минутная история, температуры и номинальная частота; Память/Диск — точные объёмы, разбивка RAM и доступный SMART/TBW; Сеть — скорости, отдельные графики входящего/исходящего трафика, IP и итог за сессию. Отдельная сводка объединяет ключевые показатели и доступна в Medium/Large. Размер и закрепление задаются в Настройках или по правому клику. Публичный IP требует включения запроса в «Сеть и IP».
+
+**Проверки:** 116 обычных тестов пройдены, 6 аппаратных/сетевых включаются отдельно; проверены 11 компоновок виджетов. Universal-сборка содержит Intel и arm64, новые сообщения переведены на все 12 языков. Измеренная фоновая нагрузка и ограничения описаны в [PERFORMANCE.md](docs/PERFORMANCE.md); это не гарантия единого CPU-порога для любых настроек.
 
 **[Скачать установщик](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** → открыть DMG → перетащить MacPulse в «Программы». Перед обновлением завершите старую копию. Для Homebrew используйте команды из раздела Install выше.
 

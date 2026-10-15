@@ -69,8 +69,7 @@ struct ApplicationMetadataLabel: View {
     }
     private var relative: String {
         guard let date = metadata.lastUsed else { return L("Never") }
-        let formatter = RelativeDateTimeFormatter(); formatter.locale = locale; formatter.unitsStyle = .full
-        return formatter.localizedString(for: date, relativeTo: Date())
+        return ViewFormatters.relative(date, locale: locale)
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {

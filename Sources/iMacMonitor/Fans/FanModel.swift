@@ -10,7 +10,9 @@ final class FanModel: ObservableObject {
     @Published private(set) var active = false
     @Published private(set) var authorizing = false
     @Published private(set) var error: String?
+    var interfaceVisible = false
     private let service = FanService()
+    private var lastSample = Date.distantPast
     private var polling: Task<Void, Never>?
     private var launcher: Process?
     private var session: URL?
@@ -29,10 +31,15 @@ final class FanModel: ObservableObject {
         polling = Task { [weak self] in
             while !Task.isCancelled {
                 guard let service = self?.service else { break }
-                let snapshot = await service.sample()
-                self?.accept(snapshot)
+                let now = Date()
+                if self?.interfaceVisible == true || self?.session != nil || now.timeIntervalSince(self?.lastSample ?? .distantPast) >= 15 {
+                    let snapshot = await service.sample()
+                    self?.lastSample = now
+                    self?.accept(snapshot)
+                }
+                // Keep the lease wakeup short even when a session starts during idle telemetry.
                 self?.heartbeat()
-                try? await Task.sleep(for: .seconds(2))
+                try? await Task.sleep(for: .seconds(2), tolerance: .milliseconds(200))
             }
         }
     }

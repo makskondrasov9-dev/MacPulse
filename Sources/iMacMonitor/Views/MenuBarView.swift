@@ -29,7 +29,7 @@ struct MenuBarView: View {
                 MetricGauge(title: L("Диск"), used: disk.used, total: disk.total)
             }
             Divider()
-            Toggle(L("Enable desktop widgets"), isOn: $widgets)
+            Toggle(L("Enable desktop widgets"), isOn: Binding(get: { widgets }, set: { WidgetPreferences.setMaster($0) }))
             Button(L("Открыть MacPulse")) {
                 openWindow(id: "dashboard")
                 NSApp.activate(ignoringOtherApps: true)
@@ -39,6 +39,8 @@ struct MenuBarView: View {
         .monospacedDigit()
         .padding(20)
         .frame(width: 380)
+        .onAppear { model.popoverVisible = true }
+        .onDisappear { model.popoverVisible = false }
     }
 }
 

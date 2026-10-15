@@ -151,7 +151,7 @@ struct ThermalPoint: Identifiable {
     }
     private func updateProgress(_ value: Double) { progress = value }
     func cancel() { task?.cancel(); latencyTask?.cancel() }
-    func sample(_ snapshot: MonitorSnapshot) {
+    func sample(_ snapshot: MonitorSnapshot, identityNeeded: Bool = true) {
         if running == .network {
             transfers.append(TransferPoint(date: snapshot.date,
                 download: snapshot.network.downloadBytesPerSecond.map { $0 * 8 / 1e6 },
@@ -174,7 +174,7 @@ struct ThermalPoint: Identifiable {
             if currentThermalPressure || (limit ?? 100) < 100 { sawThermalPressure = true }
             if state == .critical { thermalStop = true; cancel() }
         }
-        if snapshot.date.timeIntervalSince(lastIdentity) >= 15 || (publicIPEnabled && !ipBusy && snapshot.date.timeIntervalSince(lastPublic) >= publicIPInterval) { refreshIdentity() }
+        if identityNeeded && snapshot.date.timeIntervalSince(lastIdentity) >= 15 || (publicIPEnabled && !ipBusy && snapshot.date.timeIntervalSince(lastPublic) >= publicIPInterval) { refreshIdentity() }
     }
     func refreshIdentity(forcePublic: Bool = false) {
         guard identityTask == nil else { return }

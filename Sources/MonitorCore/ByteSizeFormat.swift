@@ -5,22 +5,15 @@ public enum ByteSizeFormat {
     /// ByteCountFormatter has no locale property; its modern attributed format
     /// style supplies localized units when the app language differs from macOS.
     public static func string(_ bytes: UInt64, locale: Locale = L10n.locale) -> String {
-        let count = Int64(clamping: bytes)
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        formatter.isAdaptive = true
-        formatter.allowsNonnumericFormatting = false
-        formatter.zeroPadsFractionDigits = true
         let units: ByteCountFormatStyle.Units
         let divisor: Double
         let digits: Int
         switch bytes {
-        case 0..<1_000: formatter.allowedUnits = .useBytes; units = .bytes; divisor = 1; digits = 0
-        case 1_000..<1_000_000: formatter.allowedUnits = .useKB; units = .kb; divisor = 1_000; digits = 0
-        case 1_000_000..<1_000_000_000: formatter.allowedUnits = .useMB; units = .mb; divisor = 1_000_000; digits = 1
-        default: formatter.allowedUnits = .useGB; units = .gb; divisor = 1_000_000_000; digits = 2
+        case 0..<1_000: units = .bytes; divisor = 1; digits = 0
+        case 1_000..<1_000_000: units = .kb; divisor = 1_000; digits = 0
+        case 1_000_000..<1_000_000_000: units = .mb; divisor = 1_000_000; digits = 1
+        default: units = .gb; divisor = 1_000_000_000; digits = 2
         }
-        if locale.identifier == Locale.current.identifier { return formatter.string(fromByteCount: count) }
         return localized(Double(bytes), units: units, divisor: divisor, digits: digits, locale: locale)
     }
 

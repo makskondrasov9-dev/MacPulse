@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SessionPeaks: Codable, Sendable {
+public struct SessionPeaks: Codable, Sendable, Equatable {
     public private(set) var cpuTemperatureDate: Date?
     public private(set) var cpuTemperature: Double?
     public private(set) var memoryBytes: UInt64 = 0
@@ -13,13 +13,13 @@ public struct SessionPeaks: Codable, Sendable {
     }
 }
 
-public struct UsageEntry: Codable, Identifiable, Sendable {
+public struct UsageEntry: Codable, Identifiable, Sendable, Equatable {
     public let id: String
     public var name: String
     public var seconds: Double
 }
 
-public struct DailyUsage: Codable, Sendable {
+public struct DailyUsage: Codable, Sendable, Equatable {
     public private(set) var day: Date
     public private(set) var entries: [String: UsageEntry] = [:]
     public init(now: Date = Date(), calendar: Calendar = .current) { day = calendar.startOfDay(for: now) }

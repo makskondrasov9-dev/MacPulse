@@ -1,5 +1,5 @@
 // swift-tools-version: 6.0
-// MacPulse release 1.0.0 (build 17); bundle version is set by scripts/build-app.sh.
+// MacPulse release 1.0.1 (build 18); bundle version is set by scripts/build-app.sh.
 import PackageDescription
 
 let package = Package(

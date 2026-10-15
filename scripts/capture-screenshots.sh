@@ -17,13 +17,13 @@ source = source.replace(needle, needle + '''
 Path('.build/screenshots/MainWindowView.swift').write_text(source)
 PY
 SOURCES=()
-while IFS= read -r file; do SOURCES+=("$file"); done < <(find Sources/iMacMonitor -name '*.swift' ! -name iMacMonitorApp.swift ! -name MainWindowView.swift)
+while IFS= read -r file; do SOURCES+=("$file"); done < <(rg --files Sources/iMacMonitor -g '*.swift' -g '!iMacMonitorApp.swift' -g '!MainWindowView.swift')
 EXTRA=()
 if [[ -f .build/toolchain/overlay.json ]]; then
     EXTRA=(-vfsoverlay .build/toolchain/overlay.json -module-cache-path .build/toolchain/cache)
 fi
-xcrun swiftc -parse-as-library -swift-version 6 -target "$(uname -m)-apple-macosx13.0" "${EXTRA[@]}" \
+xcrun swiftc -whole-module-optimization -parse-as-library -swift-version 6 -target "$(uname -m)-apple-macosx13.0" "${EXTRA[@]}" \
     -I "$BIN/Modules" -Xcc -fmodule-map-file="$BIN/CSystem.build/module.modulemap" -I Sources/CSystem/include \
     "${SOURCES[@]}" .build/screenshots/MainWindowView.swift scripts/screenshots/CaptureApp.swift \
     "$BIN"/MonitorCore.build/*.swift.o "$BIN"/CSystem.build/*.o -framework IOKit -o .build/screenshots/MacPulseScreenshots
-.build/screenshots/MacPulseScreenshots
+.build/screenshots/MacPulseScreenshots "$@"
