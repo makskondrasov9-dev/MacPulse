@@ -5,11 +5,13 @@ import SwiftUI
 struct UninstallerView: View {
     @ObservedObject var model: UninstallerModel
     @State private var query = ""
+    @State private var sort: ApplicationSort = .size
+    @State private var filter: ApplicationFilter = .all
     @State private var confirming = false
     @State private var targeted = false
     @Environment(\.locale) private var locale
     private var visible: [InstalledApplication] {
-        model.applications.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) || $0.bundleID.localizedCaseInsensitiveContains(query) }
+        ApplicationOrdering.list(model.applications, metadata: model.metadata, sort: sort, filter: filter).filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) || $0.bundleID.localizedCaseInsensitiveContains(query) }
     }
     var body: some View {
         let _ = locale
@@ -33,7 +35,7 @@ struct UninstallerView: View {
             GeometryReader { geometry in
                 if geometry.size.width < 720 {
                     VStack(spacing: 12) {
-                        applicationList.frame(height: 170)
+                        applicationList.frame(height: 260)
                         Divider()
                         detailPane
                     }
@@ -67,6 +69,13 @@ struct UninstallerView: View {
     private var applicationList: some View {
         VStack {
             TextField(L("Поиск приложений"), text: $query).textFieldStyle(.roundedBorder)
+            Picker(L("Sort"), selection: $sort) {
+                ForEach(ApplicationSort.allCases, id: \.self) { Text(L10n.text($0.rawValue)).tag($0) }
+            }
+            Picker(L("Filter"), selection: $filter) {
+                ForEach(ApplicationFilter.allCases, id: \.self) { Text(L10n.text($0.rawValue)).tag($0) }
+            }
+            if model.loadingMetadata { Text(L("Reading app metadata…")).font(.caption).foregroundStyle(.secondary) }
             List(visible) { app in
                 Button { model.inspect(app.url) } label: {
                     HStack {
@@ -74,6 +83,7 @@ struct UninstallerView: View {
                         VStack(alignment: .leading) {
                             Text(app.name).lineLimit(2)
                             Text("\(app.version) · \(app.architecture)").font(.caption).foregroundStyle(.secondary)
+                            if let metadata = model.metadata[app.id] { ApplicationMetadataLabel(metadata: metadata) }
                         }
                         Spacer(minLength: 0)
                     }.contentShape(Rectangle())
@@ -88,6 +98,7 @@ struct UninstallerView: View {
                 if let scan = model.preview {
                     Text(scan.application.name).font(.title2.bold())
                     Text(scan.application.bundleID).font(.caption).textSelection(.enabled)
+                    if let metadata = model.metadata[scan.application.id] { ApplicationMetadataLabel(metadata: metadata) }
                     Text(L("Найдено: \(ByteSizeFormat.string(scan.bytes))"))
                     Text(L("Данные приложения могут содержать проекты и настройки. Проверьте выбранные пути. Совпадения только по названию не выбраны автоматически."))
                         .font(.caption).foregroundStyle(.secondary)

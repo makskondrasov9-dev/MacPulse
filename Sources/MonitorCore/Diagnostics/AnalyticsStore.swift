@@ -1,12 +1,13 @@
 import Foundation
 
 public struct SessionPeaks: Codable, Sendable {
+    public private(set) var cpuTemperatureDate: Date?
     public private(set) var cpuTemperature: Double?
     public private(set) var memoryBytes: UInt64 = 0
     public private(set) var gpuLoad: Double?
     public init() {}
-    public mutating func record(temperature: Double?, memory: UInt64?, gpu: Double?) {
-        if let t = temperature, t.isFinite, (0...150).contains(t) { cpuTemperature = max(cpuTemperature ?? t, t) }
+    public mutating func record(temperature: Double?, memory: UInt64?, gpu: Double?, date: Date = Date()) {
+        if let t = temperature, t.isFinite, (0...150).contains(t) { if cpuTemperature == nil || t > cpuTemperature! { cpuTemperature = t; cpuTemperatureDate = date } }
         if let memory { memoryBytes = max(memoryBytes, memory) }
         if let gpu, gpu.isFinite, (0...100).contains(gpu) { gpuLoad = max(gpuLoad ?? gpu, gpu) }
     }
@@ -70,5 +71,24 @@ public actor AnalyticsStore {
         let url = directory.appendingPathComponent(name)
         try JSONEncoder().encode(value).write(to: url, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
+    }
+}
+
+/// Activation events split intervals immediately; sampling only flushes the current interval.
+public struct ForegroundUsageTracker: Sendable {
+    private var current: (id: String, name: String)?
+    private var date: Date?
+    public init() {}
+    public mutating func reset(at now: Date) { current = nil; date = now }
+    public mutating func tick(at now: Date, eligible: Bool, usage: inout DailyUsage) {
+        // A delayed metric sample must not rewind the event timeline.
+        guard date == nil || now >= date! else { return }
+        usage.resetDay(at: now)
+        if eligible, let date, let current { usage.record(id: current.id, name: current.name, from: date, to: now) }
+        date = now
+    }
+    public mutating func activate(id: String?, name: String, at now: Date, eligible: Bool, usage: inout DailyUsage) {
+        tick(at: now, eligible: eligible, usage: &usage)
+        current = id.map { ($0, name) }
     }
 }

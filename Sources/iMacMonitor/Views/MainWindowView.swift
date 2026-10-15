@@ -3,10 +3,12 @@ import MonitorCore
 import SwiftUI
 
 private enum MainSection: String, CaseIterable, Identifiable {
+    case network = "Сеть"
     case monitor = "Монитор", cleaner = "Очистка", fans = "Вентиляторы", settings = "Настройки", uninstaller = "Деинсталлятор", diagnostics = "Diagnostics"
     var id: Self { self }
     var icon: String {
         switch self {
+        case .network: "network"
         case .monitor: "chart.xyaxis.line"
         case .cleaner: "sparkles"
         case .settings: "gearshape"
@@ -18,8 +20,9 @@ private enum MainSection: String, CaseIterable, Identifiable {
 }
 
 struct MainWindowView: View {
-    @ObservedObject var model: MonitorModel
-    @ObservedObject var fanModel: FanModel
+    let model: MonitorModel
+    let fanModel: FanModel
+    @AppStorage("desktopWidgetsEnabled") private var widgets = false
     @State private var selection: MainSection? = .monitor
 
     @Environment(\.locale) private var presentationLocale
@@ -28,14 +31,13 @@ struct MainWindowView: View {
         let _ = presentationLocale
         GeometryReader { geometry in
             NavigationSplitView {
-                List(MainSection.allCases.filter { $0 != .fans || !fanModel.fans.isEmpty }, selection: $selection) { section in
-                    Label(L10n.text(section.rawValue), systemImage: section.icon).tag(section)
-                }
+                MainSidebar(fanModel: fanModel, selection: $selection)
                 .navigationTitle("MacPulse")
                 .navigationSplitViewColumnWidth(min: 180, ideal: 210, max: 300)
             } detail: {
                 Group {
                     switch selection ?? .monitor {
+                    case .network: NetworkProcessesView()
                     case .monitor: DashboardView(model: model)
                     case .cleaner: CleanerView(model: model.cleaner)
                     case .settings: SettingsView(model: model)
@@ -45,6 +47,7 @@ struct MainWindowView: View {
                     }
                 }
                 .navigationTitle(L10n.text((selection ?? .monitor).rawValue))
+                .toolbar { Toggle(L("Enable desktop widgets"), isOn: $widgets).toggleStyle(.checkbox) }
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
@@ -74,6 +77,7 @@ private struct WindowContentBoundary: NSViewRepresentable {
             guard let window, let content = window.contentView,
                   let split = firstSplit(in: content),
                   let guide = window.contentLayoutGuide as? NSLayoutGuide else { return }
+            window.level = .normal
             guard fittedSplit !== split else { return }
             fittedSplit = split
             split.translatesAutoresizingMaskIntoConstraints = false
@@ -87,4 +91,14 @@ private struct WindowContentBoundary: NSViewRepresentable {
     }
     func makeNSView(context: Context) -> BoundaryView { BoundaryView() }
     func updateNSView(_ nsView: BoundaryView, context: Context) { nsView.needsLayout = true }
+}
+
+private struct MainSidebar: View {
+    @ObservedObject var fanModel: FanModel
+    @Binding var selection: MainSection?
+    var body: some View {
+        List(MainSection.allCases.filter { $0 != .fans || !fanModel.fans.isEmpty }, selection: $selection) { section in
+            Label(L10n.text(section.rawValue), systemImage: section.icon).tag(section)
+        }
+    }
 }

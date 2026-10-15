@@ -6,6 +6,8 @@ import MonitorCore
 struct iMacMonitorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @AppStorage("appLanguage") private var language = "system"
+    @AppStorage("applicationMode") private var applicationMode = "accessory"
+    @AppStorage("accentColor") private var accent = AppAccent.blue.rawValue
     @AppStorage("appearance") private var appearance = "system"
     @StateObject private var model: MonitorModel
     private var colorScheme: ColorScheme? {
@@ -32,14 +34,18 @@ struct iMacMonitorApp: App {
             MenuBarView(model: model)
                 .environment(\.locale, Locale(identifier: AppLanguage.resolve(language).rawValue))
                 .environment(\.layoutDirection, AppLanguage.resolve(language) == .ar ? .rightToLeft : .leftToRight)
+                .tint((AppAccent(rawValue: accent) ?? .blue).color)
+                .accentColor((AppAccent(rawValue: accent) ?? .blue).color)
                 .preferredColorScheme(colorScheme)
                 .onInitialChange(of: appearance) { value in
                     NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
                         (value == "light" ? NSAppearance(named: .aqua) : nil)
                 }
+                .onInitialChange(of: applicationMode) { delegate.applyMode($0) }
                 .onAppear { configure() }
         } label: {
             MenuBarLabel(model: model)
+                .onInitialChange(of: applicationMode) { delegate.applyMode($0) }
                 .onAppear { configure() }
         }
         .menuBarExtraStyle(.window)
@@ -48,17 +54,21 @@ struct iMacMonitorApp: App {
             MainWindowView(model: model, fanModel: model.fans)
                 .environment(\.locale, Locale(identifier: AppLanguage.resolve(language).rawValue))
                 .environment(\.layoutDirection, AppLanguage.resolve(language) == .ar ? .rightToLeft : .leftToRight)
+                .tint((AppAccent(rawValue: accent) ?? .blue).color)
+                .accentColor((AppAccent(rawValue: accent) ?? .blue).color)
                 .preferredColorScheme(colorScheme)
                 .onInitialChange(of: appearance) { value in
                     NSApp.appearance = value == "dark" ? NSAppearance(named: .darkAqua) :
                         (value == "light" ? NSAppearance(named: .aqua) : nil)
                 }
+                .onInitialChange(of: applicationMode) { delegate.applyMode($0) }
                 .onAppear { configure() }
         }
         .defaultSize(width: 1040, height: 780)
     }
 
     private func configure() {
+        DesktopWidgetService.shared.sync(model)
         delegate.model = model
         model.start()
     }
@@ -67,6 +77,22 @@ struct iMacMonitorApp: App {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var model: MonitorModel?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        applyMode(UserDefaults.standard.string(forKey: "applicationMode") ?? "accessory")
+    }
+
+    func applyMode(_ value: String) {
+        let policy: NSApplication.ActivationPolicy = value == "regular" ? .regular : .accessory
+        if NSApp.activationPolicy() != policy { NSApp.setActivationPolicy(policy) }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        if !hasVisibleWindows, let window = sender.windows.first(where: { $0.identifier?.rawValue == "dashboard" }) {
+            window.makeKeyAndOrderFront(nil)
+        }
+        return true
+    }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Task {

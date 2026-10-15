@@ -13,7 +13,7 @@
 
 MacPulse brings your Mac's everyday maintenance tools together in one Swift + SwiftUI app. See what is busy, inspect both GPUs, watch network traffic, manage supported fans, review caches and uninstall apps — without a subscription or an account.
 
-Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **0.9.0** adds hardware diagnostics, network identity and session insights, retaining the Ventura deployment target introduced in 0.8.1.
+Built on an Intel iMac 2017, with Universal binaries for modern Apple Silicon and older Intel Macs running macOS 13 or later. **Free under MIT. No telemetry, advertising or paid feature tiers.** Version **1.0.0** adds floating desktop HUDs, per-process network connections and event-driven foreground app usage, retaining macOS Ventura support.
 
 ![MacPulse dashboard with CPU, memory, two GPUs, network and history charts](docs/screenshots/dashboard.png)
 
@@ -122,6 +122,21 @@ On Homebrew versions that require explicit trust for third-party casks, review [
 
 Switch languages immediately in Settings or follow the system language. Translations were prepared with AI assistance and terminology edits; native-speaker reviews are welcome.
 
+## Flagship features in 1.0.0
+
+- **Desktop HUDs:** three draggable translucent panels for CPU/GPU sparklines, RAM/disk and network speed. Pin them above the wallpaper or float above windows. Adjust opacity (40–100%), enable click-through, and restore positions on relaunch.
+- **Process network monitor:** a dedicated Network section lists visible TCP/UDP sockets with PID, app icon, local/remote endpoint and state. Search by app or port and filter remote connections. Polling runs only while this section is open; macOS permissions determine which sockets are visible.
+- **Screen Time Lite:** local, opt-in top-five foreground app usage with colored bars. Activation notifications split time between apps; idle and sleep gaps are excluded. No window titles or document names are recorded.
+- **Session records:** CPU temperature with its peak timestamp, maximum RAM and peak GPU utilization.
+
+## Also included
+
+- Uninstaller sorting by size, name and last use; filters for unused and unsigned apps.
+- Spotlight last-use dates with a clearly identified modification-date fallback.
+- Local code-signature validation (Apple / Developer ID, Ad-Hoc, unsigned or invalid). Signature validity does **not** prove notarization.
+- On-demand GitHub update checks, release notes and a DMG download button.
+- Six persistent accent colors, translated into all 12 supported languages.
+
 ## Diagnostics in 0.9.0
 
 [Hardware diagnostics and analytics](docs/DIAGNOSTICS.md): cancellable disk/CPU/Metal tests, a display inspector, networkQuality, opt-in public-IP history and foreground-app usage, plus session peaks. IP and tunnel indicators are also available in Monitor and the menu bar. Technical network details and unavailable values can be shown or hidden. A tunnel indicator does not guarantee VPN protection of all traffic.
@@ -137,7 +152,7 @@ bash scripts/build-app.sh
 bash scripts/package-dmg.sh
 ```
 
-For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. The **85-test suite** (80 default checks plus five hardware opt-ins) covers metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines and SMART decoding. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
+For mixed-version Command Line Tools installations, use `bash scripts/swift-local.sh build` and `bash scripts/swift-local.sh test`. The **112-test suite** (106 default checks plus six hardware opt-ins) covers metrics, localization, process control, fan policy, cleaner safety, uninstaller safety, sparklines and SMART decoding. Deletion tests use temporary fixtures. Runtime testing on Ventura and additional Mac models is welcome; the Ventura target has been compiled here, while local runtime checks used Sonoma.
 
 [Development](docs/DEVELOPMENT.md) · [Uninstaller architecture](docs/UNINSTALLER.md) · [Report an issue](https://github.com/makskondrasov9-dev/MacPulse/issues) · [MIT license](LICENSE)
 
@@ -147,7 +162,7 @@ If MacPulse is useful to you, a GitHub star helps others find it. Reports with y
 
 **MacPulse — бесплатный нативный набор инструментов для Mac на Swift и SwiftUI.** Мониторинг CPU, RAM, нескольких GPU и сети, управление поддерживаемыми вентиляторами, очистка и удаление приложений собраны в одном окне. Без подписок, рекламы и телеметрии; исходники под MIT.
 
-Проект вырос из утилиты для iMac 2017. Версия **0.9.0** добавляет диагностику диска, CPU/GPU, экрана и сети, аналитику и IP/VPN в строке меню. Минимальная система — **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
+Проект вырос из утилиты для iMac 2017. Версия **1.0.0** добавляет три плавающих виджета, таблицу TCP/UDP-соединений процессов, цветные шкалы времени использования программ и время достижения температурного пика. Диагностика, очистка, деинсталлятор и все прежние возможности сохранены. Минимальная система — **macOS 13 Ventura**. Universal DMG работает на архитектурах Intel и Apple Silicon, но доступность датчиков зависит от модели. Управление вентиляторами Apple Silicon пока только для чтения; неподдерживаемые SMART-показания скрываются. Проверка целевой версии компилятором пройдена, отдельный запуск на Ventura ещё требует проверки.
 
 **[Скачать установщик](https://github.com/makskondrasov9-dev/MacPulse/releases/latest/download/MacPulse.dmg)** → открыть DMG → перетащить MacPulse в «Программы». Перед обновлением завершите старую копию. Для Homebrew используйте команды из раздела Install выше.
 

@@ -4,6 +4,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @ObservedObject var model: MonitorModel
+    @AppStorage("desktopWidgetsEnabled") private var widgets = false
     @AppStorage("hideUnavailableMetrics") private var hideUnavailable = true
     @Environment(\.openWindow) private var openWindow
 
@@ -28,6 +29,7 @@ struct MenuBarView: View {
                 MetricGauge(title: L("Диск"), used: disk.used, total: disk.total)
             }
             Divider()
+            Toggle(L("Enable desktop widgets"), isOn: $widgets)
             Button(L("Открыть MacPulse")) {
                 openWindow(id: "dashboard")
                 NSApp.activate(ignoringOtherApps: true)

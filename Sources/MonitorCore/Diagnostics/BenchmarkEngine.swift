@@ -68,15 +68,19 @@ public enum BenchmarkEngine {
     private static func posixError() -> DiagnosticError { .failed(String(cString: strerror(errno))) }
 
     /// Independent bounded vector workloads, one per logical CPU; yield between batches.
-    public static func cpu(seconds: Int) async throws -> UInt64 {
+    public static func cpu(seconds: Int, workers: Int = CPUCapabilities.maximumWorkers,
+                           progress: @escaping @Sendable (CPUProgress) async -> Void = { _ in }) async throws -> UInt64 {
         guard [15, 30, 60].contains(seconds) else { throw DiagnosticError.failed("Invalid test duration") }
+        guard (1...CPUCapabilities.maximumWorkers).contains(workers) else { throw DiagnosticError.failed("Invalid worker count") }
+        let accumulator = CPUProgressAccumulator(workers: workers)
         let deadline = ProcessInfo.processInfo.systemUptime + Double(seconds)
         return try await withThrowingTaskGroup(of: UInt64.self) { group in
-            for _ in 0..<ProcessInfo.processInfo.activeProcessorCount {
+            for worker in 0..<workers {
                 group.addTask(priority: .utility) {
                     var values = [Float](repeating: 0.5, count: 65_536)
                     var output = values
                     var count: UInt64 = 0
+                    var lastReport = ProcessInfo.processInfo.systemUptime
                     while ProcessInfo.processInfo.systemUptime < deadline {
                         try Task.checkCancellation()
                         if count % 256 == 0 && ProcessInfo.processInfo.thermalState == .critical {
@@ -92,6 +96,10 @@ public enum BenchmarkEngine {
                         // Keep non-zero operands to avoid denormal/zero-only workloads.
                         for i in stride(from: 0, to: values.count, by: 64) { values[i] = 0.9999 }
                         count += 1
+                        if count % 64 == 0 && ProcessInfo.processInfo.systemUptime - lastReport >= 0.5 {
+                            lastReport = ProcessInfo.processInfo.systemUptime
+                            if let sample = await accumulator.record(worker: worker, count: count) { await progress(sample) }
+                        }
                         await Task.yield()
                     }
                     return count

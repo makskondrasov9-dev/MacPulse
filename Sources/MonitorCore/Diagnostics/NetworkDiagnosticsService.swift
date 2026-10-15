@@ -20,7 +20,7 @@ public struct NetworkQualityResult: Sendable {
         let download = number("dl_throughput").map { $0 / 1_000_000 }
         let upload = number("ul_throughput").map { $0 / 1_000_000 }
         guard download != nil || upload != nil else { throw DiagnosticError.failed("No network throughput results") }
-        return Self(downloadMbps: download, uploadMbps: upload, latencyMilliseconds: number("base_rtt") ?? number("idle_latency"),
+        return Self(downloadMbps: download, uploadMbps: upload, latencyMilliseconds: number("base_rtt") ?? number("base_rtt_mean") ?? number("idle_latency"),
                     responsiveness: number("responsiveness") ?? number("rpm"))
     }
 }
@@ -29,61 +29,35 @@ public actor NetworkDiagnosticsService {
     private var measuring = false
     public init() {}
 
-    /// Output goes to a private file rather than an undrained pipe. No shell commands.
     public func measure(executable: URL = URL(fileURLWithPath: "/usr/bin/networkQuality"),
-                        arguments: [String] = ["-c"], timeout: TimeInterval = 120) async throws -> NetworkQualityResult {
+                        arguments: [String] = ["-c"], timeout: TimeInterval = 120,
+                        targets: @Sendable ([String]) async -> Void = { _ in }) async throws -> NetworkQualityResult {
         guard !measuring else { throw DiagnosticError.failed("Network test already running") }
         measuring = true
         defer { measuring = false }
-        try Task.checkCancellation()
-        let path = FileManager.default.temporaryDirectory.appendingPathComponent("MacPulse-network-\(UUID().uuidString)")
-        let fd = open(path.path, O_RDWR | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, S_IRUSR | S_IWUSR)
-        guard fd >= 0 else { throw DiagnosticError.failed("Cannot create network output file") }
-        let output = FileHandle(fileDescriptor: fd, closeOnDealloc: true)
-        defer { try? output.close(); try? FileManager.default.removeItem(at: path) }
-        let process = Process()
-        process.executableURL = executable; process.arguments = arguments
-        process.standardOutput = output
-        process.standardError = FileHandle.nullDevice
-        try process.run()
-        let start = ProcessInfo.processInfo.systemUptime
-        do {
-            while process.isRunning {
-                try Task.checkCancellation()
-                if ProcessInfo.processInfo.systemUptime - start > timeout { throw DiagnosticError.failed("Network test timed out") }
-                try await Task.sleep(for: .milliseconds(100))
-            }
-            try Task.checkCancellation()
-        } catch {
-            if process.isRunning { process.terminate() }
-            let grace = ProcessInfo.processInfo.systemUptime + 2
-            while process.isRunning && ProcessInfo.processInfo.systemUptime < grace {
-                // Cancellation is already pending: use an uncancelled child solely for bounded cleanup.
-                await Task.detached { try? await Task.sleep(for: .milliseconds(50)) }.value
-            }
-            if process.isRunning { kill(process.processIdentifier, SIGKILL) }
-            while process.isRunning { await Task.detached { try? await Task.sleep(for: .milliseconds(20)) }.value }
-            throw error
+        var args = arguments
+        var configFile: URL?
+        defer { if let configFile { try? FileManager.default.removeItem(at: configFile) } }
+        if executable.path == "/usr/bin/networkQuality", arguments == ["-c"] {
+            let configURL = URL(string: "https://mensura.cdn-apple.com/api/v1/gm/config")!
+            await targets([configURL.absoluteString])
+            let data = try await DiagnosticHTTP.fetch(configURL, maximumBytes: 65_536)
+            let endpoints = try NetworkTestConfiguration.endpoints(data)
+            let path = FileManager.default.temporaryDirectory.appendingPathComponent("MacPulse-network-config-\(UUID().uuidString).json")
+            try data.write(to: path, options: [.atomic])
+            configFile = path
+            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: path.path)
+            args += ["-C", path.absoluteString]
+            await targets(endpoints)
         }
-        guard process.terminationStatus == 0 else { throw DiagnosticError.failed("networkQuality failed (\(process.terminationStatus))") }
-        try output.seek(toOffset: 0)
-        let data = try output.read(upToCount: 1_048_577) ?? Data()
-        guard data.count <= 1_048_576 else { throw DiagnosticError.failed("Network output exceeded limit") }
-        return try NetworkQualityResult.parse(data)
+        let result = try await DiagnosticProcess.run(executable.path, arguments: args, timeout: timeout)
+        guard result.status == 0 else { throw DiagnosticError.failed("networkQuality failed (\(result.status))") }
+        return try NetworkQualityResult.parse(result.data)
     }
 
-    public func publicIP() async throws -> String {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 10
-        configuration.timeoutIntervalForResource = 15
-        let session = URLSession(configuration: configuration)
-        defer { session.invalidateAndCancel() }
-        let (data, response) = try await session.data(from: URL(string: "https://api64.ipify.org?format=json")!)
-        guard (response as? HTTPURLResponse)?.statusCode == 200, data.count < 1024,
-              let json = try JSONSerialization.jsonObject(with: data) as? [String: String], let ip = json["ip"], Self.validIP(ip) else {
-            throw DiagnosticError.failed("Public IP is unavailable")
-        }
-        return ip
+    public func publicIP(endpoint: String = PublicIPConfiguration.defaultURL) async throws -> String {
+        let config = try PublicIPConfiguration(endpoint: endpoint, interval: 60)
+        return try PublicIPConfiguration.parse(await DiagnosticHTTP.fetch(config.url, maximumBytes: 1024))
     }
 
     public static func validIP(_ value: String) -> Bool {

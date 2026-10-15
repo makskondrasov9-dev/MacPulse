@@ -95,24 +95,13 @@ struct DashboardView: View {
                         } else { Text("—") }
                     }
                 }
-                InsightsView(model: model.insights)
+                .id("metric-cards")
+                InsightsView(model: model.insights).id("session-insights")
                 card(L("CPU & GPU · 60 seconds"), icon: "waveform.path.ecg") {
                     Text(model.snapshot?.gpu.name ?? "GPU").font(.caption).foregroundStyle(.secondary)
-                    Chart(model.history) { point in
-                        if let cpu = point.cpu {
-                            LineMark(x: .value(L("Time"), point.date), y: .value(L("Load"), cpu))
-                                .foregroundStyle(by: .value(L("Device"), "CPU"))
-                        }
-                        if let gpu = point.gpu {
-                            LineMark(x: .value(L("Time"), point.date), y: .value(L("Load"), gpu))
-                                .foregroundStyle(by: .value(L("Device"), "GPU"))
-                        }
-                    }
-                    .chartYScale(domain: 0...100)
-                    .chartXScale(domain: (model.history.last?.date ?? Date()).addingTimeInterval(-60)...(model.history.last?.date ?? Date()))
-                    .chartForegroundStyleScale(["CPU": Color.blue, "GPU": Color.orange])
-                    .frame(height: 160)
+                    HistoryChart(history: model.history)
                 }
+                .id("history-chart")
                 HStack {
                     Text(L("Top 10 Processes")).font(.headline)
                     Spacer()
@@ -160,6 +149,8 @@ struct DashboardView: View {
                     .font(.caption).foregroundStyle(.secondary)
 
             }
+            .id("dashboard-content")
+            .animation(.easeInOut(duration: 0.2), value: hideUnavailable)
             .padding(24)
         }
         .background(.ultraThinMaterial)
@@ -191,5 +182,28 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
         .padding(16)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+/// Rasterize only the rolling plot, preserving native text and controls elsewhere.
+private struct HistoryChart: View {
+    let history: [HistoryPoint]
+    var body: some View {
+        Chart(history) { point in
+            if let cpu = point.cpu {
+                LineMark(x: .value(L("Time"), point.date), y: .value(L("Load"), cpu))
+                    .foregroundStyle(by: .value(L("Device"), "CPU"))
+            }
+            if let gpu = point.gpu {
+                LineMark(x: .value(L("Time"), point.date), y: .value(L("Load"), gpu))
+                    .foregroundStyle(by: .value(L("Device"), "GPU"))
+            }
+        }
+        .chartYScale(domain: 0...100)
+        .chartXScale(domain: (history.last?.date ?? Date()).addingTimeInterval(-60)...(history.last?.date ?? Date()))
+        .chartForegroundStyleScale(["CPU": Color.blue, "GPU": Color.orange])
+        .frame(height: 160)
+        .padding(.vertical, 8)
+        .drawingGroup()
     }
 }

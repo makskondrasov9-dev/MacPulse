@@ -10,6 +10,7 @@ import AppKit
                 DisplayTestController.shared.show()
                 try? await Task.sleep(for: .milliseconds(300))
                 guard let window = app.windows.first(where: { $0.isVisible && $0.level == .screenSaver }), let view = window.contentView else { DisplayTestController.shared.close(); print("No display window"); exit(1) }
+                precondition(view.accessibilityHelp() != nil, "HUD should be visible at launch")
                 let expected: [[CGFloat]] = [[1,0,0],[0,1,0],[0,0,1],[1,1,1],[0,0,0]]
                 for (index, rgb) in expected.enumerated() {
                     try? await Task.sleep(for: .milliseconds(600))
@@ -29,9 +30,10 @@ import AppKit
                         view.keyDown(with: NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber, context: nil, characters: " ", charactersIgnoringModifiers: " ", isARepeat: false, keyCode: 49)!)
                     }
                 }
+                precondition(view.accessibilityHelp() == nil, "HUD should disappear after three seconds")
                 view.keyDown(with: NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber, context: nil, characters: "\u{1b}", charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53)!)
                 precondition(!window.isVisible)
-                print("Display smoke passed: five RGB colors, click, Space and Escape.")
+                print("Display smoke passed: five RGB colors, timed HUD, click, Space and Escape.")
                 app.stop(nil)
                 exit(0)
             }

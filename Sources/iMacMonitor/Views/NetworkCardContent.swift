@@ -45,8 +45,8 @@ struct NetworkIdentitySummary: View {
             if model.publicIPEnabled {
                 if model.publicIP != nil || !hideUnavailable { Text(L("Public IP") + ": " + (model.publicIP ?? "—")).textSelection(.enabled) }
             } else {
-                Button(L("Enable public IP") + " (ipify)") { model.publicIPEnabled = true }
-                    .help(L("Public IP lookup uses ipify. Enable it to check every 60 seconds."))
+                Button(L("Enable public IP")) { model.publicIPEnabled = true }
+                    .help(L("The configured service receives your public IP. History stays on this Mac (up to 200 changes). Configure the URL and interval in Settings."))
             }
             Label(network.hasTunnel ? L("Tunnel detected") : L("No tunnel detected"), systemImage: network.hasTunnel ? "network.badge.shield.half.filled" : "network")
                 .help(L("VPN detection is based on tunnel interfaces with an assigned IP; it does not guarantee traffic protection."))

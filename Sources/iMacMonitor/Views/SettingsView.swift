@@ -4,8 +4,10 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
-    @ObservedObject var model: MonitorModel
+    let model: MonitorModel
     @AppStorage("appLanguage") private var language = "system"
+    @AppStorage("applicationMode") private var applicationMode = "accessory"
+    @AppStorage("accentColor") private var accent = AppAccent.blue.rawValue
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage("showMenuBarIcon") private var showIcon = true
     @AppStorage("showCPUPercentage") private var showCPU = true
@@ -38,13 +40,16 @@ struct SettingsView: View {
                 Text(L("Язык меняется сразу. Названия процессов и пути к файлам сохраняются в оригинале."))
                     .font(.caption).foregroundStyle(.secondary)
             }
+            UpdateSettingsView()
+            DesktopWidgetSettings()
             Section(L("Автозапуск")) {
                 Toggle(L("Запускать при входе в систему"), isOn: Binding(
                     get: { loginItem.isEnabled },
                     set: { enabled in Task { await loginItem.setEnabled(enabled) } }
                 ))
-                .disabled(loginItem.isUpdating)
-                if loginItem.status == .requiresApproval {
+                .disabled(loginItem.hasPendingOperation)
+                if loginItem.isUpdating { ProgressView().controlSize(.small) }
+                if loginItem.status == .requiresApproval || loginItem.errorMessage != nil {
                     Text(L("Разрешите автозапуск MacPulse в Системных настройках."))
                         .font(.caption).foregroundStyle(.secondary)
                     Button(L("Открыть настройки автозапуска")) { loginItem.openSettings() }
@@ -58,7 +63,18 @@ struct SettingsView: View {
                         .font(.caption).foregroundStyle(.red)
                 }
             }
+            Section(L("Application mode")) {
+                Picker(L("Application mode"), selection: $applicationMode) {
+                    Text(L("Menu bar only")).tag("accessory")
+                    Text(L("Dock and menu bar")).tag("regular")
+                }
+            }
             Section(L("Оформление")) {
+                Picker(L("Accent color"), selection: $accent) {
+                    ForEach(AppAccent.allCases, id: \.self) { item in
+                        Label(L10n.text(item.rawValue), systemImage: "circle.fill").foregroundStyle(item.color).tag(item.rawValue)
+                    }
+                }
                 Picker(L("Тема"), selection: $appearance) {
                     Text(L("Как в системе")).tag("system")
                     Text(L("Светлая")).tag("light")
@@ -92,6 +108,9 @@ struct SettingsView: View {
                 Text(L("Если отключить все элементы, значок останется, чтобы меню было доступно."))
                     .font(.caption).foregroundStyle(.secondary)
             }
+            Section(L("Public IP service")) {
+                PublicIPSettings(model: model.diagnostics)
+            }
             Section(L("Обновление метрик")) {
                 Slider(value: $pollingInterval, in: 1...3, step: 0.5) {
                     Text(L("Интервал: \(pollingInterval, specifier: "%.1f") с"))
@@ -117,10 +136,9 @@ struct SettingsView: View {
             if value != normalized { pollingInterval = normalized }
             model.setPollingInterval(normalized)
         }
-        .task { loginItem.refresh(); await checkAccess() }
+        .task { await loginItem.refresh(); await checkAccess() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            loginItem.refresh()
-            Task { await checkAccess() }
+            Task { await loginItem.refresh(); await checkAccess() }
         }
     }
 
@@ -162,12 +180,29 @@ private struct NetworkIdentitySettings: View {
                 Text(L("Public IP")).tag("public")
             }
             if ipSource == "public" {
-                Toggle(L("Public IP history (ipify)"), isOn: $model.publicIPEnabled)
-                Text(L("Public IP lookup uses ipify. Enable it to check every 60 seconds.")).font(.caption).foregroundStyle(.secondary)
+                Toggle(L("Public IP history"), isOn: $model.publicIPEnabled)
+                Text(L("The configured service receives your public IP. History stays on this Mac (up to 200 changes). Configure the URL and interval in Settings.")).font(.caption).foregroundStyle(.secondary)
             }
         }
         Toggle(L("VPN indicator in menu bar"), isOn: $showVPN)
         Text(L("VPN detection is based on tunnel interfaces with an assigned IP; it does not guarantee traffic protection.")).font(.caption).foregroundStyle(.secondary)
         Toggle(L("Hide unavailable values"), isOn: $hideUnavailable)
+    }
+}
+
+private struct PublicIPSettings: View {
+    @ObservedObject var model: DiagnosticsModel
+    @State private var endpoint = ""
+    @State private var interval = 60.0
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+        Toggle(L("Public IP history"), isOn: $model.publicIPEnabled)
+        TextField("HTTPS URL", text: $endpoint).textFieldStyle(.roundedBorder)
+        Stepper(value: $interval, in: 15...3600, step: 15) { Text(L("Polling interval (seconds)") + ": " + String(Int(interval))) }
+        Text(L("HTTPS only. Response: plain IP or JSON with an ip field. The selected service sees your public IP."))
+            .font(.caption).foregroundStyle(.secondary)
+        Button(L("Apply")) { model.configurePublicIP(endpoint: endpoint, interval: interval) }
+        if let error = model.ipError { Text(error).font(.caption).foregroundStyle(.secondary) }
+        }.task { endpoint = model.publicIPEndpoint; interval = model.publicIPInterval }
     }
 }

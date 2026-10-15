@@ -53,6 +53,7 @@ final class MonitorModel: ObservableObject {
     }
 
     func stop() async {
+        DesktopWidgetService.shared.stop()
         polling?.cancel()
         await polling?.value
         polling = nil
